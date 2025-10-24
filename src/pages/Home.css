@@ -1,0 +1,21 @@
+.home-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.home-page h1 {
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-secondary, #666);
+    margin-bottom: 32px;
+}
+
+.stats-row {
+    margin-bottom: 24px;
+}
+
+.recent-photos-card {
+    min-height: 300px;
+}

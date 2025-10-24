@@ -1,104 +1,87 @@
-# Implementation Plan: [FEATURE]
+# 功能规划文档
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+## 基本信息
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+- **功能名称**: [功能名称]
+- **优先级**: [高/中/低]
+- **预计工作量**: [小时/天数]
+- **负责人**: [负责人]
+- **目标版本**: [版本号]
+- **创建日期**: [YYYY-MM-DD]
 
-## Summary
+## 功能概述
 
-[Extract from feature spec: primary requirement + technical approach from research]
+[简要描述该功能的目的和价值]
 
-## Technical Context
+## 宪章合规检查
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+在开始实现前，确认本功能符合项目宪章的以下原则：
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+- [ ] **隐私至上**: 数据是否保持本地？是否有网络请求？
+- [ ] **性能优先**: 是否考虑了性能影响？是否需要缓存？
+- [ ] **用户体验至上**: 操作是否直观？是否在3次点击内？
+- [ ] **数据完整性**: 是否有数据修改？是否可撤销？
+- [ ] **可扩展性**: 是否采用模块化设计？
+- [ ] **跨平台兼容**: 是否考虑了平台差异？
 
-## Constitution Check
+## 用户故事
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+作为 [用户角色]，我想要 [功能]，以便 [目标/价值]。
 
-[Gates determined based on constitution file]
+**验收标准**:
+- [ ] [标准1]
+- [ ] [标准2]
+- [ ] [标准3]
 
-## Project Structure
+## 技术方案
 
-### Documentation (this feature)
+### 架构设计
 
-```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
-```
+[描述技术架构、组件交互]
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### 关键技术点
 
-```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+1. **[技术点1]**: [说明]
+2. **[技术点2]**: [说明]
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+### 数据模型
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+[如果涉及数据结构变更，描述数据模型]
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
+## 依赖项
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
+- **前置条件**: [需要先完成的功能]
+- **技术依赖**: [需要的库/框架/工具]
+- **外部依赖**: [第三方服务等]
 
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
-```
+## 风险评估
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+| 风险 | 影响程度 | 可能性 | 缓解措施 |
+|------|---------|--------|----------|
+| [风险1] | 高/中/低 | 高/中/低 | [措施] |
 
-## Complexity Tracking
+## 测试策略
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+- [ ] 单元测试覆盖核心逻辑
+- [ ] 集成测试验证功能流程
+- [ ] 性能测试（如适用）
+- [ ] 跨平台测试
+- [ ] 用户验收测试
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+## 实施阶段
+
+1. **阶段1**: [任务] - [时间]
+2. **阶段2**: [任务] - [时间]
+3. **阶段3**: [任务] - [时间]
+
+## 文档要求
+
+- [ ] API文档（如适用）
+- [ ] 用户手册更新
+- [ ] 开发者指南更新
+- [ ] 变更日志
+
+## 参考资料
+
+- [相关文档链接]
+- [技术参考]

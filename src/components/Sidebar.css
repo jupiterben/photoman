@@ -1,0 +1,27 @@
+.app-sidebar {
+    border-right: 1px solid var(--border-color, #f0f0f0);
+}
+
+.sidebar-logo {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.logo-icon {
+    font-size: 24px;
+    color: #1890ff;
+}
+
+.logo-text {
+    color: var(--text-primary);
+}
+
+.app-sidebar.ant-layout-sider-collapsed .logo-text {
+    display: none;
+}

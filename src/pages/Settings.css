@@ -1,0 +1,15 @@
+.settings-page {
+    max-width: 800px;
+}
+
+.settings-page h1 {
+    margin-bottom: 24px;
+}
+
+.settings-card {
+    margin-bottom: 16px;
+}
+
+.settings-actions {
+    margin-top: 24px;
+}

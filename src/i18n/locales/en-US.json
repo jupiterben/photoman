@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "PhotoMan",
+    "description": "Local Photo Management Application",
+    "title": "PhotoMan - Photo Manager"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "noData": "No Data",
+    "confirm": "Confirm",
+    "back": "Back"
+  },
+  "theme": {
+    "light": "Light Theme",
+    "dark": "Dark Theme",
+    "toggle": "Toggle Theme"
+  },
+  "sidebar": {
+    "home": "Home",
+    "allPhotos": "All Photos",
+    "favorites": "Favorites",
+    "tags": "Tags",
+    "albums": "Albums",
+    "trash": "Trash",
+    "settings": "Settings"
+  },
+  "toolbar": {
+    "search": "Search photos...",
+    "import": "Import Photos",
+    "toggleTheme": "Toggle Theme",
+    "language": "Language"
+  },
+  "pages": {
+    "home": {
+      "title": "Welcome to PhotoMan",
+      "subtitle": "Your local photo management assistant",
+      "totalPhotos": "Total Photos",
+      "totalTags": "Tags",
+      "totalAlbums": "Albums",
+      "recentPhotos": "Recently Imported",
+      "noPhotos": "No photos imported yet"
+    },
+    "photos": {
+      "title": "All Photos",
+      "noPhotos": "No photos yet, click import to start",
+      "import": "Import Photos"
+    },
+    "settings": {
+      "title": "Settings",
+      "appearance": "Appearance",
+      "theme": "Theme",
+      "lightTheme": "Light",
+      "darkTheme": "Dark",
+      "systemTheme": "System",
+      "language": "Language",
+      "storage": "Storage",
+      "cacheSize": "Cache Size Limit (MB)",
+      "recycleBinDays": "Recycle Bin Retention Days",
+      "backup": "Backup",
+      "autoBackup": "Auto Backup",
+      "backupTime": "Backup Time",
+      "backupDay": "Backup Day",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "save": "Save Settings",
+      "reset": "Reset",
+      "saved": "Settings saved"
+    }
+  }
+}

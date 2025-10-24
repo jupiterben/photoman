@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "PhotoMan",
+    "description": "本地图片管理应用",
+    "title": "PhotoMan - 本地图片管理"
+  },
+  "common": {
+    "ok": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "search": "搜索",
+    "loading": "加载中...",
+    "noData": "暂无数据",
+    "confirm": "确认",
+    "back": "返回"
+  },
+  "theme": {
+    "light": "亮色主题",
+    "dark": "暗色主题",
+    "toggle": "切换主题"
+  },
+  "sidebar": {
+    "home": "首页",
+    "allPhotos": "所有图片",
+    "favorites": "收藏",
+    "tags": "标签",
+    "albums": "相册",
+    "trash": "回收站",
+    "settings": "设置"
+  },
+  "toolbar": {
+    "search": "搜索图片...",
+    "import": "导入图片",
+    "toggleTheme": "切换主题",
+    "language": "语言"
+  },
+  "pages": {
+    "home": {
+      "title": "欢迎使用 PhotoMan",
+      "subtitle": "您的本地图片管理助手",
+      "totalPhotos": "总图片数",
+      "totalTags": "标签数",
+      "totalAlbums": "相册数",
+      "recentPhotos": "最近导入",
+      "noPhotos": "还没有导入任何图片"
+    },
+    "photos": {
+      "title": "所有图片",
+      "noPhotos": "还没有图片，点击导入按钮开始",
+      "import": "导入图片"
+    },
+    "settings": {
+      "title": "设置",
+      "appearance": "外观",
+      "theme": "主题",
+      "lightTheme": "亮色",
+      "darkTheme": "暗色",
+      "systemTheme": "跟随系统",
+      "language": "语言",
+      "storage": "存储",
+      "cacheSize": "缓存大小限制 (MB)",
+      "recycleBinDays": "回收站保留天数",
+      "backup": "备份",
+      "autoBackup": "自动备份",
+      "backupTime": "备份时间",
+      "backupDay": "备份日期",
+      "monday": "周一",
+      "tuesday": "周二",
+      "wednesday": "周三",
+      "thursday": "周四",
+      "friday": "周五",
+      "saturday": "周六",
+      "sunday": "周日",
+      "save": "保存设置",
+      "reset": "重置",
+      "saved": "设置已保存"
+    }
+  }
+}

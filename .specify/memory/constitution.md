@@ -1,50 +1,136 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version: 0.0.0 → 1.0.0
+Modified Principles: N/A (Initial creation)
+Added Sections: All sections (initial creation)
+Removed Sections: None
+Templates Status:
+  - ✅ .specify/templates/plan-template.md (created)
+  - ✅ .specify/templates/spec-template.md (created)
+  - ✅ .specify/templates/tasks-template.md (created)
+  - ✅ .specify/templates/commands/constitution.md (created)
+Follow-up TODOs: None
+-->
 
-## Core Principles
+# PhotoMan 项目宪章
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+**版本**: 1.0.0  
+**批准日期**: 2025-10-24  
+**最后修订**: 2025-10-24
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+## 项目愿景
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+PhotoMan 是一个本地图片管理应用，旨在为用户提供高效、直观的图片组织、浏览和管理体验。本项目致力于创建一个注重隐私、性能优异且功能完善的桌面应用程序。
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+## 核心使命
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+打造一个用户友好的本地图片管理解决方案，让用户能够轻松组织、查找和管理海量图片，同时确保数据完全本地化，保护用户隐私。
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## 指导原则
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### 原则 1: 隐私至上 (Privacy First)
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**声明**: 所有用户数据和图片MUST存储在本地，应用MUST NOT向任何远程服务器传输用户图片或元数据，除非用户明确授权。
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**理由**: 用户的个人照片包含敏感信息，本地优先架构是建立用户信任的基础。任何云端功能都必须是可选的、明确的、用户可控的。
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+**实践要求**:
+- 不得包含任何默认启用的远程数据传输
+- 所有网络请求必须有明确的用户授权和说明
+- 数据库和缓存必须使用本地存储
+- 敏感操作需要用户确认
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### 原则 2: 性能优先 (Performance First)
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**声明**: 应用MUST能够流畅处理10000+张图片，图片加载和缩略图生成MUST采用异步和缓存策略，界面响应时间MUST小于100ms。
+
+**理由**: 图片管理应用的核心价值在于快速浏览和查找，性能问题会严重影响用户体验。
+
+**实践要求**:
+- 实现高效的缩略图缓存机制
+- 采用虚拟滚动技术处理大量图片列表
+- 图片加载使用懒加载和预加载策略
+- 定期进行性能基准测试
+
+### 原则 3: 用户体验至上 (User Experience First)
+
+**声明**: 界面设计MUST遵循直观性原则，核心功能MUST在3次点击内完成，MUST提供键盘快捷键支持常用操作。
+
+**理由**: 简洁直观的界面能降低学习成本，提高工作效率，是用户留存的关键。
+
+**实践要求**:
+- 遵循现代UI/UX设计规范
+- 提供清晰的操作反馈
+- 支持拖放操作
+- 提供完整的键盘快捷键方案
+- 支持批量操作
+
+### 原则 4: 数据完整性 (Data Integrity)
+
+**声明**: 所有文件操作MUST提供撤销机制或确认提示，删除操作MUST先移至回收站，MUST定期验证数据库和文件系统的一致性。
+
+**理由**: 图片是不可替代的宝贵数据，任何数据损失都是不可接受的。
+
+**实践要求**:
+- 实现操作历史和撤销功能
+- 删除操作使用软删除或系统回收站
+- 定期备份数据库
+- 实现数据校验和修复机制
+- 文件移动使用安全的原子操作
+
+### 原则 5: 可扩展性 (Extensibility)
+
+**声明**: 核心功能MUST采用模块化设计，MUST支持插件或扩展机制，文件格式处理MUST易于添加新格式支持。
+
+**理由**: 用户需求多样化，可扩展的架构能够让应用持续进化，满足不同用户群体的需求。
+
+**实践要求**:
+- 采用清晰的分层架构
+- 定义明确的接口和抽象
+- 支持插件系统
+- 文档化扩展开发指南
+- 提供示例插件
+
+### 原则 6: 跨平台兼容 (Cross-Platform Compatibility)
+
+**声明**: 应用MUST支持Windows、macOS和Linux主流平台，MUST处理不同平台的路径和文件系统差异，界面MUST适配各平台的设计规范。
+
+**理由**: 用户可能在不同平台工作，跨平台支持能扩大用户基础，提升应用价值。
+
+**实践要求**:
+- 使用跨平台框架（如Electron、Tauri等）
+- 处理平台特定的文件路径
+- 遵循各平台的UI设计指南
+- 在所有目标平台进行测试
+
+## 治理规则
+
+### 修订流程
+
+1. 任何原则的修改必须通过项目核心团队讨论
+2. 重大变更需要在变更日志中详细记录理由
+3. 版本号遵循语义化版本规范：
+   - **主版本号**: 不兼容的原则删除或重新定义
+   - **次版本号**: 新增原则或重大扩展
+   - **修订号**: 文字澄清、错误修正、非语义改进
+
+### 版本控制
+
+- 每次修订必须更新 `LAST_AMENDED_DATE`
+- 保持 `RATIFICATION_DATE` 不变以追溯初始批准
+- 在版本控制系统中标记宪章变更
+
+### 合规审查
+
+- 每个重大功能开发前必须参考本宪章
+- 代码审查必须检查是否符合原则要求
+- 定期（至少每季度）审查项目实践是否符合宪章
+- 如发现原则与实践不符，优先修正实践，确实需要时才修订原则
+
+## 适用范围
+
+本宪章适用于PhotoMan项目的所有代码、文档、决策和贡献，所有贡献者和维护者必须遵守这些原则。
+
+---
+
+*本宪章是PhotoMan项目的根本指导文件，确保项目在发展过程中保持一致性和高质量。*
