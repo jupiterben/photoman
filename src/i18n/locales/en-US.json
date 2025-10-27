@@ -2,7 +2,7 @@
   "app": {
     "name": "PhotoMan",
     "description": "Local Photo Management Application",
-    "title": "PhotoMan - Photo Manager"
+    "title": "PhotoMan - Local Photo Management"
   },
   "common": {
     "ok": "OK",
@@ -15,7 +15,10 @@
     "loading": "Loading...",
     "noData": "No Data",
     "confirm": "Confirm",
-    "back": "Back"
+    "back": "Back",
+    "actions": "Actions",
+    "none": "None",
+    "totalItems": "Total {{total}} items"
   },
   "theme": {
     "light": "Light Theme",
@@ -37,10 +40,69 @@
     "toggleTheme": "Toggle Theme",
     "language": "Language"
   },
+  "folder": {
+    "selectTitle": "Select Photo Folder",
+    "selectButton": "Select Folder",
+    "selectError": "Failed to select folder"
+  },
+  "scan": {
+    "inProgress": "Scanning...",
+    "completed": "Scan Completed",
+    "totalFiles": "Total Files",
+    "processedFiles": "Processed",
+    "foundPhotos": "Photos Found",
+    "currentPath": "Current Path",
+    "summary": "Found {{found}} photos in {{total}} files, skipped {{skipped}} duplicates",
+    "startedMessage": "Background scan started, you can continue using the app",
+    "successMessage": "Successfully imported {{count}} photos",
+    "errorMessage": "Scan failed: {{error}}"
+  },
+  "tags": {
+    "inputPlaceholder": "Enter tag name...",
+    "pressEnterToCreate": "Press Enter to create new tag",
+    "tagAdded": "Tag added",
+    "addTagError": "Failed to add tag",
+    "tagAlreadyAdded": "Tag already exists",
+    "maxTagsReached": "Maximum tags reached ({{max}})",
+    "photos": "photos",
+    "selectTags": "Select Tags",
+    "selectedTags": "Selected Tags",
+    "noTagsSelected": "No tags selected",
+    "availableTags": "Available Tags",
+    "noTagsAvailable": "No tags available",
+    "loadError": "Failed to load tags",
+    "filterByTags": "Filter by Tags",
+    "clearFilter": "Clear Filter",
+    "matchAny": "Match Any",
+    "matchAll": "Match All",
+    "activeFilters": "Active Filters",
+    "allTags": "All Tags",
+    "createTag": "Create Tag",
+    "editTag": "Edit Tag",
+    "deleteTag": "Delete Tag",
+    "tagName": "Tag Name",
+    "tagColor": "Tag Color",
+    "usageCount": "Usage Count",
+    "deleteConfirm": "Are you sure to delete this tag?",
+    "deleteSuccess": "Tag deleted",
+    "deleteError": "Failed to delete tag",
+    "management": "Tag Management",
+    "totalTags": "Total Tags",
+    "usedTags": "Used Tags",
+    "unusedTags": "Unused Tags",
+    "totalAssociations": "Total Associations",
+    "nameRequired": "Please enter tag name",
+    "nameTooLong": "Tag name cannot exceed 50 characters",
+    "namePlaceholder": "Enter tag name",
+    "createSuccess": "Tag created successfully",
+    "createError": "Failed to create tag",
+    "updateSuccess": "Tag updated successfully",
+    "updateError": "Failed to update tag"
+  },
   "pages": {
     "home": {
       "title": "Welcome to PhotoMan",
-      "subtitle": "Your local photo management assistant",
+      "subtitle": "Your Local Photo Management Assistant",
       "totalPhotos": "Total Photos",
       "totalTags": "Tags",
       "totalAlbums": "Albums",
@@ -49,7 +111,7 @@
     },
     "photos": {
       "title": "All Photos",
-      "noPhotos": "No photos yet, click import to start",
+      "noPhotos": "No photos yet, click import button to start",
       "import": "Import Photos"
     },
     "settings": {
@@ -62,7 +124,7 @@
       "language": "Language",
       "storage": "Storage",
       "cacheSize": "Cache Size Limit (MB)",
-      "recycleBinDays": "Recycle Bin Retention Days",
+      "recycleBinDays": "Recycle Bin Retention (Days)",
       "backup": "Backup",
       "autoBackup": "Auto Backup",
       "backupTime": "Backup Time",
@@ -76,7 +138,7 @@
       "sunday": "Sunday",
       "save": "Save Settings",
       "reset": "Reset",
-      "saved": "Settings saved"
+      "saved": "Settings Saved"
     }
   }
 }

@@ -6,6 +6,7 @@ import { Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
 import Toolbar from '@/components/Toolbar';
+import { BackgroundTaskIndicator } from '@/components/BackgroundTaskIndicator';
 import { useApp } from '@/contexts/AppContext';
 import './MainLayout.css';
 
@@ -28,6 +29,8 @@ function MainLayout() {
           <Outlet />
         </Content>
       </Layout>
+      {/* 后台任务指示器 - 固定在右下角 */}
+      <BackgroundTaskIndicator />
     </Layout>
   );
 }

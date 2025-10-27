@@ -5,6 +5,9 @@ mod commands;
 mod database;
 mod error;
 mod state;
+mod scanner;
+mod search;
+mod thumbnail;
 
 use database::{Database, migrations};
 use state::AppState;
@@ -15,6 +18,8 @@ fn main() {
     log::info!("Starting PhotoMan application");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             // Get app data directory
             let app_dir = app.path().app_data_dir()
@@ -48,7 +53,29 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::greet,
-            commands::get_database_info
+            commands::get_database_info,
+            commands::scan_folder,
+            commands::generate_thumbnail,
+            commands::generate_thumbnails_batch,
+            commands::cleanup_thumbnail_cache,
+            commands::get_thumbnail_cache_size,
+            commands::create_tag,
+            commands::get_all_tags,
+            commands::search_tags,
+            commands::get_most_used_tags,
+            commands::update_tag,
+            commands::delete_tag,
+            commands::get_tag_stats,
+            commands::add_tag_to_photo,
+            commands::add_tag_to_photos,
+            commands::remove_tag_from_photo,
+            commands::remove_tag_from_photos,
+            commands::get_photo_tags,
+            commands::get_photos_by_tag,
+            commands::get_photos_by_any_tags,
+            commands::get_photos_by_all_tags,
+            commands::search_photos,
+            commands::quick_search_photos
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,0 +1,134 @@
+.photo-detail-modal .ant-modal-body {
+    padding: 0;
+    height: 85vh;
+}
+
+.photo-detail-container {
+    display: flex;
+    height: 100%;
+}
+
+.photo-detail-viewer {
+    flex: 1;
+    position: relative;
+    background: #000;
+}
+
+.photo-detail-nav {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+.nav-button {
+    pointer-events: all;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.nav-button:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.photo-detail-metadata {
+    width: 350px;
+    background: #fff;
+    padding: 24px;
+    overflow-y: auto;
+    border-left: 1px solid #f0f0f0;
+}
+
+.metadata-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.metadata-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-path {
+    word-break: break-all;
+    font-size: 12px;
+    color: #666;
+}
+
+.hash-code {
+    font-size: 11px;
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.metadata-tags {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.metadata-tags h4 {
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.metadata-shortcuts {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.metadata-shortcuts h4 {
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.metadata-shortcuts ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.metadata-shortcuts li {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #666;
+}
+
+.metadata-shortcuts kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: monospace;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-right: 4px;
+}

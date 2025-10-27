@@ -1,0 +1,14 @@
+/* T125: 高级筛选面板样式 */
+.advanced-filter-modal .ant-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.advanced-filter-modal .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.advanced-filter-modal .ant-space-compact {
+  width: 100%;
+}
+

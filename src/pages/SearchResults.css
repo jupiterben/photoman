@@ -1,0 +1,50 @@
+/* 搜索结果页面样式 */
+.search-results-page {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-results-page .page-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.search-results-page .page-header h1 {
+  margin: 0;
+  font-size: 24px;
+  flex: 1;
+}
+
+.search-results-count {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+}
+
+.search-results-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+}
+
+.search-results-more {
+  text-align: center;
+  padding: 24px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* 暗色主题 */
+.dark-theme .search-results-count {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.dark-theme .search-results-more {
+  color: rgba(255, 255, 255, 0.45);
+}
+

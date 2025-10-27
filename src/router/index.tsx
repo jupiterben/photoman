@@ -6,6 +6,7 @@ import MainLayout from '@/layouts/MainLayout';
 import Home from '@/pages/Home';
 import Photos from '@/pages/Photos';
 import Settings from '@/pages/Settings';
+import SearchResults from '@/pages/SearchResults';
 
 // Placeholder components for routes that will be implemented later
 const Favorites = () => <div>收藏页面 - 待实现</div>;
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
       {
         path: 'photos',
         element: <Photos />,
+      },
+      {
+        path: 'search-results',
+        element: <SearchResults />,
       },
       {
         path: 'favorites',

@@ -1,15 +1,18 @@
 /**
  * Top toolbar component
  */
-import { Layout, Input, Button, Space, Dropdown } from 'antd';
+import { useState } from 'react';
+import { Layout, Button, Space, Dropdown } from 'antd';
 import {
-  SearchOutlined,
   PlusOutlined,
   BulbOutlined,
   BulbFilled,
   GlobalOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { useImportPhotos } from '@/hooks/useImportPhotos';
+import { SearchBar } from './SearchBar';
+import { AdvancedFilter } from './AdvancedFilter';
 import './Toolbar.css';
 
 const { Header } = Layout;
@@ -19,6 +22,7 @@ interface ToolbarProps {
   isDarkMode?: boolean;
   onLanguageChange?: (lang: string) => void;
   currentLanguage?: string;
+  onImportComplete?: () => void;
 }
 
 function Toolbar({
@@ -26,12 +30,20 @@ function Toolbar({
   isDarkMode = false,
   onLanguageChange,
   currentLanguage = 'zh-CN',
+  onImportComplete,
 }: ToolbarProps) {
   const { t, i18n } = useTranslation();
+  const { startImport, isSelecting } = useImportPhotos();
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     onLanguageChange?.(lang);
+  };
+
+  const handleImportClick = async () => {
+    await startImport(onImportComplete);
+    // 扫描在后台进行，不需要等待
   };
 
   const languageMenuItems = [
@@ -50,11 +62,9 @@ function Toolbar({
   return (
     <Header className="app-toolbar">
       <div className="toolbar-left">
-        <Input
-          prefix={<SearchOutlined />}
-          placeholder={t('toolbar.search', '搜索图片...')}
-          className="search-input"
-          allowClear
+        <SearchBar
+          onAdvancedFilterClick={() => setAdvancedFilterOpen(true)}
+          showAdvancedFilter={true}
         />
       </div>
       <div className="toolbar-right">
@@ -62,10 +72,8 @@ function Toolbar({
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => {
-              // Will implement in Phase 3
-              console.log('Import photos');
-            }}
+            onClick={handleImportClick}
+            loading={isSelecting}
           >
             {t('toolbar.import', '导入图片')}
           </Button>
@@ -82,6 +90,12 @@ function Toolbar({
           </Dropdown>
         </Space>
       </div>
+
+      {/* 高级筛选模态框 */}
+      <AdvancedFilter
+        open={advancedFilterOpen}
+        onClose={() => setAdvancedFilterOpen(false)}
+      />
     </Header>
   );
 }

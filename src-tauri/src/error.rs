@@ -141,7 +141,13 @@ impl From<&str> for AppError {
 }
 
 /// Result type alias for PhotoMan operations
-pub type AppResult<T> = Result<T, AppError>;
+pub type AppResult<T> = std::result::Result<T, AppError>;
+
+/// Alias for AppError (for consistency across codebase)
+pub type PhotoManError = AppError;
+
+/// Alias for Result type (for consistency across codebase)
+pub type Result<T> = std::result::Result<T, AppError>;
 
 // Helper functions for common error scenarios
 
@@ -163,6 +169,33 @@ pub fn validation_error(message: impl Into<String>) -> AppError {
 /// Create an invalid input error
 pub fn invalid_input(message: impl Into<String>) -> AppError {
     AppError::new(ErrorCode::InvalidInput, message)
+}
+
+impl AppError {
+    /// Create a database error
+    pub fn database_error(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::DatabaseError, message)
+    }
+    
+    /// Create an IO error
+    pub fn io_error(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::FileReadError, message)
+    }
+    
+    /// Create an image error
+    pub fn image_error(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::ImageProcessingError, message)
+    }
+    
+    /// Create an invalid path error
+    pub fn invalid_path(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::InvalidFilePath, message)
+    }
+    
+    /// Create a Tauri error
+    pub fn tauri_error(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::InternalError, message)
+    }
 }
 
 #[cfg(test)]

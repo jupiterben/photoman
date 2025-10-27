@@ -4,15 +4,15 @@
 
 - **项目名称**: PhotoMan 本地图片管理应用
 - **技术栈**: Tauri 2.0 + React 18 + TypeScript 5 + Rust
-- **开发周期**: 24周（6个月）
+- **开发周期**: 21周（5个月）
 - **创建日期**: 2025-10-24
 - **状态**: 规划完成，准备开始实施
 
 ## 任务统计
 
-- **总任务数**: 156个任务
-- **并行任务**: 42个（标记为[P]）
-- **用户故事数**: 4个核心场景 + 11个功能需求
+- **总任务数**: 147个任务
+- **并行任务**: 38个（标记为[P]）
+- **用户故事数**: 4个核心场景
 - **预计MVP**: 用户故事1（导入和浏览）+ 基础UI
 
 ## 实施策略
@@ -128,10 +128,10 @@
 
 ### 2.4 状态管理
 
-- [ ] T045 创建Zustand store结构（src/stores/）
-- [ ] T046 [P] 实现应用状态store（src/stores/appStore.ts）
-- [ ] T047 [P] 实现设置状态store（src/stores/settingsStore.ts）
-- [ ] T048 实现状态持久化（localStorage）
+- [x] T045 创建Zustand store结构（src/stores/）
+- [x] T046 [P] 实现应用状态store（src/stores/appStore.ts）
+- [x] T047 [P] 实现设置状态store（src/stores/settingsStore.ts）
+- [x] T048 实现状态持久化（localStorage）
 
 ---
 
@@ -153,66 +153,66 @@
 
 ### 3.1 文件扫描 (Rust后端)
 
-- [ ] T049 [US1] 创建scanner模块（src-tauri/src/scanner/mod.rs）
-- [ ] T050 [US1] 实现文件系统遍历（src-tauri/src/scanner/walker.rs，使用walkdir）
-- [ ] T051 [US1] 实现图片格式检测（src-tauri/src/scanner/detector.rs，使用image crate）
-- [ ] T052 [US1] 实现文件哈希计算（src-tauri/src/scanner/hasher.rs，SHA-256）
-- [ ] T053 [US1] 实现重复检测逻辑（src-tauri/src/scanner/dedup.rs）
-- [ ] T054 [US1] 实现扫描进度报告（使用Tauri事件）
-- [ ] T055 [US1] 实现scan_folder Tauri命令（src-tauri/src/commands/scan.rs）
+- [x] T049 [US1] 创建scanner模块（src-tauri/src/scanner/mod.rs）
+- [x] T050 [US1] 实现文件系统遍历（src-tauri/src/scanner/walker.rs，使用walkdir）
+- [x] T051 [US1] 实现图片格式检测（src-tauri/src/scanner/detector.rs，使用image crate）
+- [x] T052 [US1] 实现文件哈希计算（src-tauri/src/scanner/hasher.rs，SHA-256）
+- [x] T053 [US1] 实现重复检测逻辑（src-tauri/src/scanner/dedup.rs）
+- [x] T054 [US1] 实现扫描进度报告（使用Tauri事件）
+- [x] T055 [US1] 实现scan_folder Tauri命令（src-tauri/src/commands/scan.rs）
 - [ ] T056 [US1] 编写扫描模块单元测试
 
 ### 3.2 数据访问层
 
-- [ ] T057 [US1] 创建Photo实体DAO（src-tauri/src/database/photos.rs）
-- [ ] T058 [US1] 实现Photo CRUD操作
-- [ ] T059 [US1] 实现ScanJob DAO（src-tauri/src/database/scan_jobs.rs）
-- [ ] T060 [US1] 实现批量插入优化
-- [ ] T061 [US1] 编写DAO单元测试
+- [x] T057 [US1] 创建Photo实体DAO（src-tauri/src/database/photos.rs）
+- [x] T058 [US1] 实现Photo CRUD操作
+- [x] T059 [US1] 实现ScanJob DAO（src-tauri/src/database/scan_jobs.rs）
+- [x] T060 [US1] 实现批量插入优化
+- [x] T061 [US1] 编写DAO单元测试
 
 ### 3.3 缩略图生成 (Rust后端)
 
-- [ ] T062 [US1] 创建thumbnail模块（src-tauri/src/thumbnail/mod.rs）
-- [ ] T063 [US1] 实现缩略图生成器（src-tauri/src/thumbnail/generator.rs，使用image crate）
-- [ ] T064 [US1] 实现多尺寸生成（small 200x200，medium 800x600）
-- [ ] T065 [US1] 实现缓存管理（src-tauri/src/thumbnail/cache.rs）
-- [ ] T066 [US1] 实现LRU淘汰策略
-- [ ] T067 [US1] 实现generate_thumbnail Tauri命令
-- [ ] T068 [US1] 实现异步生成（tokio后台任务）
+- [x] T062 [US1] 创建thumbnail模块（src-tauri/src/thumbnail/mod.rs）
+- [x] T063 [US1] 实现缩略图生成器（src-tauri/src/thumbnail/generator.rs，使用image crate）
+- [x] T064 [US1] 实现多尺寸生成（small 200x200，medium 800x600）
+- [x] T065 [US1] 实现缓存管理（src-tauri/src/thumbnail/cache.rs）
+- [x] T066 [US1] 实现LRU淘汰策略
+- [x] T067 [US1] 实现generate_thumbnail Tauri命令
+- [x] T068 [US1] 实现异步生成（tokio后台任务）
 - [ ] T069 [US1] 编写缩略图模块单元测试
 
 ### 3.4 前端 - 导入界面
 
-- [ ] T070 [P] [US1] 实现文件夹选择对话框（src/components/FolderPicker.tsx）
-- [ ] T071 [P] [US1] 实现扫描进度条组件（src/components/ScanProgress.tsx）
-- [ ] T072 [P] [US1] 实现扫描结果摘要组件（src/components/ScanSummary.tsx）
-- [ ] T073 [US1] 实现扫描API调用（src/api/scanner.ts）
-- [ ] T074 [US1] 实现扫描状态管理（src/stores/scanStore.ts）
-- [ ] T075 [US1] 集成Tauri事件监听（扫描进度）
+- [x] T070 [P] [US1] 实现文件夹选择对话框（src/components/FolderPicker.tsx）
+- [x] T071 [P] [US1] 实现扫描进度条组件（src/components/ScanProgress.tsx）
+- [x] T072 [P] [US1] 实现扫描结果摘要组件（集成到ScanProgress）
+- [x] T073 [US1] 实现扫描API调用（src/api/scanner.ts）
+- [x] T074 [US1] 实现扫描状态管理（src/stores/scanStore.ts）
+- [x] T075 [US1] 集成Tauri事件监听（扫描进度）
 
 ### 3.5 前端 - 网格视图
 
-- [ ] T076 [P] [US1] 实现虚拟滚动网格组件（src/components/PhotoGrid.tsx，使用react-window）
-- [ ] T077 [P] [US1] 实现照片卡片组件（src/components/PhotoCard.tsx）
-- [ ] T078 [P] [US1] 实现缩略图加载逻辑
-- [ ] T079 [P] [US1] 实现图片选择状态（单选、多选）
-- [ ] T080 [US1] 实现缩略图大小调整（3档）
-- [ ] T081 [US1] 实现照片store（src/stores/photoStore.ts）
-- [ ] T082 [US1] 实现图片列表API（src/api/photos.ts）
+- [x] T076 [P] [US1] 实现虚拟滚动网格组件（src/components/PhotoGrid.tsx，使用react-window）
+- [x] T077 [P] [US1] 实现照片卡片组件（src/components/PhotoCard.tsx）
+- [x] T078 [P] [US1] 实现缩略图加载逻辑
+- [x] T079 [P] [US1] 实现图片选择状态（单选、多选）
+- [x] T080 [US1] 实现缩略图大小调整（3档）
+- [x] T081 [US1] 实现照片store（src/stores/photoStore.ts）
+- [x] T082 [US1] 实现图片列表API（src/api/photos.ts）
 
 ### 3.6 前端 - 详情视图
 
-- [ ] T083 [P] [US1] 实现图片详情模态框（src/components/PhotoDetail.tsx）
-- [ ] T084 [P] [US1] 实现图片缩放和平移（src/components/ImageViewer.tsx）
-- [ ] T085 [P] [US1] 实现键盘导航（方向键切换）
-- [ ] T086 [P] [US1] 实现图片预加载策略
-- [ ] T087 [US1] 实现元数据侧边栏（基础版）
+- [x] T083 [P] [US1] 实现图片详情模态框（src/components/PhotoDetail.tsx）
+- [x] T084 [P] [US1] 实现图片缩放和平移（src/components/ImageViewer.tsx）
+- [x] T085 [P] [US1] 实现键盘导航（方向键切换）
+- [x] T086 [P] [US1] 实现图片预加载策略
+- [x] T087 [US1] 实现元数据侧边栏（基础版）
 
 ### 3.7 集成测试 [US1]
 
-- [ ] T088 [US1] 编写导入流程端到端测试
-- [ ] T089 [US1] 编写网格视图性能测试（10000张图片）
-- [ ] T090 [US1] 编写详情视图测试
+- [x] T088 [US1] 编写导入流程端到端测试
+- [x] T089 [US1] 编写网格视图性能测试（10000张图片）
+- [x] T090 [US1] 编写详情视图测试
 
 ---
 
@@ -235,37 +235,37 @@
 
 ### 4.1 标签数据层 (Rust后端)
 
-- [ ] T091 [US2] 创建Tag DAO（src-tauri/src/database/tags.rs）
-- [ ] T092 [US2] 实现Tag CRUD操作
-- [ ] T093 [US2] 实现PhotoTag关联DAO（src-tauri/src/database/photo_tags.rs）
-- [ ] T094 [US2] 实现批量标签操作
-- [ ] T095 [US2] 实现标签使用统计更新
+- [x] T091 [US2] 创建Tag DAO（src-tauri/src/database/tags.rs）
+- [x] T092 [US2] 实现Tag CRUD操作
+- [x] T093 [US2] 实现PhotoTag关联DAO（src-tauri/src/database/photo_tags.rs）
+- [x] T094 [US2] 实现批量标签操作
+- [x] T095 [US2] 实现标签使用统计更新
 - [ ] T096 [US2] 编写标签DAO单元测试
 
 ### 4.2 标签命令 (Rust后端)
 
-- [ ] T097 [US2] 实现add_tag命令（src-tauri/src/commands/tags.rs）
-- [ ] T098 [US2] 实现remove_tag命令
-- [ ] T099 [US2] 实现get_all_tags命令
-- [ ] T100 [US2] 实现get_photos_by_tag命令
-- [ ] T101 [US2] 实现update_tag命令
+- [x] T097 [US2] 实现add_tag命令（src-tauri/src/commands/tags.rs）
+- [x] T098 [US2] 实现remove_tag命令
+- [x] T099 [US2] 实现get_all_tags命令
+- [x] T100 [US2] 实现get_photos_by_tag命令
+- [x] T101 [US2] 实现update_tag命令
 
 ### 4.3 前端 - 标签UI
 
-- [ ] T102 [P] [US2] 实现标签输入组件（src/components/TagInput.tsx）
-- [ ] T103 [P] [US2] 实现标签自动补全功能
-- [ ] T104 [P] [US2] 实现标签选择器组件（src/components/TagSelector.tsx）
-- [ ] T105 [P] [US2] 实现标签显示组件（src/components/TagChip.tsx）
-- [ ] T106 [US2] 实现标签管理页面（src/pages/TagManagement.tsx）
-- [ ] T107 [US2] 实现批量标签操作UI
-- [ ] T108 [US2] 实现标签状态管理（src/stores/tagStore.ts）
-- [ ] T109 [US2] 实现标签API封装（src/api/tags.ts）
+- [x] T102 [P] [US2] 实现标签输入组件（src/components/TagInput.tsx）
+- [x] T103 [P] [US2] 实现标签自动补全功能
+- [x] T104 [P] [US2] 实现标签选择器组件（src/components/TagSelector.tsx）
+- [x] T105 [P] [US2] 实现标签显示组件（src/components/TagChip.tsx）
+- [x] T106 [US2] 实现标签管理页面（src/pages/TagManagement.tsx）
+- [x] T107 [US2] 实现批量标签操作UI
+- [x] T108 [US2] 实现标签状态管理（src/stores/tagStore.ts）
+- [x] T109 [US2] 实现标签API封装（src/api/tags.ts）
 
 ### 4.4 标签筛选
 
-- [ ] T110 [US2] 实现标签筛选栏（src/components/TagFilter.tsx）
-- [ ] T111 [US2] 实现筛选逻辑集成
-- [ ] T112 [US2] 实现标签筛选状态管理
+- [x] T110 [US2] 实现标签筛选栏（src/components/TagFilter.tsx）
+- [x] T111 [US2] 实现筛选逻辑集成
+- [x] T112 [US2] 实现标签筛选状态管理
 
 ### 4.5 集成测试 [US2]
 
@@ -294,23 +294,23 @@
 
 ### 5.1 搜索引擎 (Rust后端)
 
-- [ ] T116 [US3] 实现搜索模块（src-tauri/src/search/mod.rs）
-- [ ] T117 [US3] 实现全文搜索索引（SQLite FTS5）
-- [ ] T118 [US3] 实现search_photos命令（src-tauri/src/commands/search.rs）
-- [ ] T119 [US3] 实现高级筛选逻辑
-- [ ] T120 [US3] 实现组合查询构建器
+- [x] T116 [US3] 实现搜索模块（src-tauri/src/search/mod.rs）
+- [x] T117 [US3] 实现全文搜索索引（SQLite LIKE查询）
+- [x] T118 [US3] 实现search_photos命令（src-tauri/src/commands/search.rs）
+- [x] T119 [US3] 实现高级筛选逻辑
+- [x] T120 [US3] 实现组合查询构建器
 - [ ] T121 [US3] 优化搜索性能（索引、缓存）
 - [ ] T122 [US3] 编写搜索模块单元测试
 
 ### 5.2 前端 - 搜索UI
 
-- [ ] T123 [P] [US3] 实现搜索栏组件（src/components/SearchBar.tsx）
-- [ ] T124 [P] [US3] 实现搜索结果高亮
-- [ ] T125 [P] [US3] 实现高级筛选面板（src/components/AdvancedFilter.tsx）
-- [ ] T126 [P] [US3] 实现筛选条件构建器UI
-- [ ] T127 [US3] 实现搜索历史记录（src/stores/searchStore.ts）
-- [ ] T128 [US3] 实现智能相册（保存筛选条件）
-- [ ] T129 [US3] 实现搜索API封装（src/api/search.ts）
+- [x] T123 [P] [US3] 实现搜索栏组件（src/components/SearchBar.tsx）
+- [x] T124 [P] [US3] 实现搜索结果高亮
+- [x] T125 [P] [US3] 实现高级筛选面板（src/components/AdvancedFilter.tsx）
+- [x] T126 [P] [US3] 实现筛选条件构建器UI
+- [x] T127 [US3] 实现搜索历史记录（src/stores/searchStore.ts）
+- [x] T128 [US3] 实现智能相册（保存筛选条件）
+- [x] T129 [US3] 实现搜索API封装（src/api/search.ts）
 
 ### 5.3 集成测试 [US3]
 
@@ -364,101 +364,50 @@
 
 ---
 
-## Phase 7: 高级功能和优化
-
-**目标**: 完善其他功能需求（相册、EXIF编辑、批量操作等）
-
-**优先级**: P2-P3
-
-**工期**: 6周
-
-### 7.1 相册功能
-
-- [ ] T148 [P] 实现Album DAO（src-tauri/src/database/albums.rs）
-- [ ] T149 [P] 实现相册命令（src-tauri/src/commands/albums.rs）
-- [ ] T150 [P] 实现相册UI（src/pages/Albums.tsx）
-- [ ] T151 [P] 实现拖放添加图片到相册
-
-### 7.2 EXIF编辑
-
-- [ ] T152 [P] 实现EXIF解析模块（src-tauri/src/exif/mod.rs，使用kamadak-exif）
-- [ ] T153 [P] 实现EXIF编辑命令
-- [ ] T154 [P] 实现元数据编辑UI（src/components/MetadataEditor.tsx）
-- [ ] T155 [P] 实现批量元数据编辑
-
-### 7.3 批量操作
-
-- [ ] T156 [P] 实现批量移动/复制命令
-- [ ] T157 [P] 实现批量重命名命令
-- [ ] T158 [P] 实现批量导出命令
-- [ ] T159 [P] 实现批量操作UI（src/components/BulkActions.tsx）
-
-### 7.4 设置系统
-
-- [ ] T160 [P] 实现设置DAO（src-tauri/src/database/settings.rs）
-- [ ] T161 [P] 实现设置命令
-- [ ] T162 [P] 实现设置页面（src/pages/Settings.tsx）
-- [ ] T163 [P] 实现导入/导出设置
-
-### 7.5 自动备份
-
-- [ ] T164 实现备份调度器（src-tauri/src/backup/scheduler.rs）
-- [ ] T165 实现备份命令
-- [ ] T166 实现恢复命令
-- [ ] T167 实现备份UI
-
-### 7.6 增量扫描
-
-- [ ] T168 实现文件系统监控（src-tauri/src/scanner/watcher.rs，使用notify crate）
-- [ ] T169 实现自动增量扫描
-- [ ] T170 实现监控设置UI
-
----
-
-## Phase 8: 打磨和发布准备
+## Phase 7: 打磨和发布准备
 
 **目标**: 性能优化、跨平台测试、文档完善
 
 **工期**: 3周
 
-### 8.1 性能优化
+### 7.1 性能优化
 
-- [ ] T171 数据库查询性能优化
-- [ ] T172 前端渲染性能优化
-- [ ] T173 内存使用优化
-- [ ] T174 启动时间优化
-- [ ] T175 大图库性能测试和调优（50000+张）
+- [ ] T148 数据库查询性能优化
+- [ ] T149 前端渲染性能优化
+- [ ] T150 内存使用优化
+- [ ] T151 启动时间优化
+- [ ] T152 大图库性能测试和调优（50000+张）
 
-### 8.2 跨平台测试
+### 7.2 跨平台测试
 
-- [ ] T176 Windows平台完整测试
-- [ ] T177 macOS平台完整测试
-- [ ] T178 Linux平台完整测试
-- [ ] T179 修复平台特定问题
+- [ ] T153 Windows平台完整测试
+- [ ] T154 macOS平台完整测试
+- [ ] T155 Linux平台完整测试
+- [ ] T156 修复平台特定问题
 
-### 8.3 UI/UX打磨
+### 7.3 UI/UX打磨
 
-- [ ] T180 加载状态优化
-- [ ] T181 错误提示优化
-- [ ] T182 空状态设计
-- [ ] T183 动画和过渡效果
-- [ ] T184 快捷入门引导
+- [ ] T157 加载状态优化
+- [ ] T158 错误提示优化
+- [ ] T159 空状态设计
+- [ ] T160 动画和过渡效果
+- [ ] T161 快捷入门引导
 
-### 8.4 文档完善
+### 7.4 文档完善
 
-- [ ] T185 编写用户手册
-- [ ] T186 编写快速入门指南
-- [ ] T187 编写FAQ文档
-- [ ] T188 编写API文档（插件开发）
-- [ ] T189 编写变更日志
+- [ ] T162 编写用户手册
+- [ ] T163 编写快速入门指南
+- [ ] T164 编写FAQ文档
+- [ ] T165 编写API文档（插件开发）
+- [ ] T166 编写变更日志
 
-### 8.5 打包和发布
+### 7.5 打包和发布
 
-- [ ] T190 配置Windows打包
-- [ ] T191 配置macOS打包和签名
-- [ ] T192 配置Linux打包（AppImage/deb/rpm）
-- [ ] T193 测试安装包
-- [ ] T194 准备发布说明
+- [ ] T167 配置Windows打包
+- [ ] T168 配置macOS打包和签名
+- [ ] T169 配置Linux打包（AppImage/deb/rpm）
+- [ ] T170 测试安装包
+- [ ] T171 准备发布说明
 
 ---
 
@@ -477,9 +426,7 @@ Phase 2 (Foundation)
     │   │
     │   └─→ Phase 6 (US4: 删除恢复)
     ↓
-Phase 7 (高级功能) ← 可并行
-    ↓
-Phase 8 (打磨发布)
+Phase 7 (打磨发布)
 ```
 
 ### 关键路径
@@ -488,7 +435,7 @@ Phase 8 (打磨发布)
 T001-T022 (Setup) → T023-T048 (Foundation) →
 T049-T090 (US1) → T091-T115 (US2) →
 T116-T132 (US3) → T133-T147 (US4) →
-T148-T170 (高级) → T171-T194 (发布)
+T148-T171 (发布)
 ```
 
 ## 并行执行示例
@@ -569,6 +516,6 @@ Group 3: T083, T084, T085  # 详情UI组件
 ---
 
 **生成日期**: 2025-10-24  
-**总任务数**: 194个  
-**预计工期**: 24周  
+**总任务数**: 171个  
+**预计工期**: 21周  
 **建议团队**: 2-3名开发者（1名Rust后端 + 1-2名前端/全栈）

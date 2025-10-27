@@ -1,5 +1,5 @@
 /// Database health check command
-use crate::error::{AppError, AppResult};
+use crate::error::AppResult;
 use crate::state::AppState;
 use serde::{Deserialize, Serialize};
 
@@ -12,11 +12,42 @@ pub struct DatabaseInfo {
 
 #[tauri::command]
 pub fn get_database_info(state: tauri::State<AppState>) -> AppResult<DatabaseInfo> {
-    let db = state.get_db();
+    let conn = state.db.lock().unwrap();
     
-    let initialized = db.is_initialized()?;
-    let schema_version = db.get_schema_version()?;
-    let path = db.get_path().to_string_lossy().to_string();
+    // Check if photos table exists
+    let initialized: bool = {
+        let count: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='photos'",
+            [],
+            |row| row.get(0),
+        )?;
+        count > 0
+    };
+    
+    // Get schema version
+    let schema_version: i32 = {
+        let table_exists: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='schema_migrations'",
+            [],
+            |row| row.get(0),
+        )?;
+
+        if table_exists == 0 {
+            0
+        } else {
+            match conn.query_row(
+                "SELECT MAX(version) FROM schema_migrations",
+                [],
+                |row| row.get(0),
+            ) {
+                Ok(v) => v,
+                Err(rusqlite::Error::QueryReturnedNoRows) => 0,
+                Err(e) => return Err(e.into()),
+            }
+        }
+    };
+    
+    let path = state.db_path.to_string_lossy().to_string();
     
     Ok(DatabaseInfo {
         initialized,

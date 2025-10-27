@@ -3,8 +3,16 @@
 
 pub mod database;
 pub mod greet;
+pub mod scan;
+pub mod search;
+pub mod thumbnail;
+pub mod tags;
 
 // Re-export commands for easy access
 pub use database::*;
 pub use greet::*;
+pub use scan::*;
+pub use search::*;
+pub use thumbnail::*;
+pub use tags::*;
 

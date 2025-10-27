@@ -1,0 +1,62 @@
+.background-task-indicator {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.background-task-indicator .task-card {
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.background-task-indicator .task-card .ant-card-head-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.background-task-indicator .task-content {
+  padding: 4px 0;
+}
+
+.background-task-indicator .task-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.background-task-indicator .task-stats .found-photos {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* 暗色主题 */
+[data-theme='dark'] .background-task-indicator .task-card {
+  background: #1f1f1f;
+  border-color: #434343;
+}
+
+[data-theme='dark'] .background-task-indicator .task-stats {
+  color: #bfbfbf;
+}
+
+[data-theme='dark'] .background-task-indicator .task-stats .found-photos {
+  color: #1890ff;
+}
+

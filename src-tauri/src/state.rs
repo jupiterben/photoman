@@ -1,29 +1,27 @@
 // Application state management
 use crate::database::Database;
-use std::sync::Mutex;
+use std::sync::Arc;
+use std::path::PathBuf;
 
 /// Global application state
 /// This struct holds all shared state that needs to be accessed across Tauri commands
-#[derive(Debug)]
 pub struct AppState {
-    /// Database connection wrapper
-    pub db: Mutex<Database>,
+    /// Database connection wrapper (Arc<Mutex> for shared access)
+    pub db: Arc<std::sync::Mutex<rusqlite::Connection>>,
+    /// Database file path
+    pub db_path: PathBuf,
 }
 
 impl AppState {
     /// Create a new application state with the given database
     pub fn new(db: Database) -> Self {
-        Self {
-            db: Mutex::new(db),
+        // 获取 Database 中的 Arc<Mutex<Connection>>
+        let conn = db.get_connection();
+        let path = db.get_path().clone();
+        Self { 
+            db: conn,
+            db_path: path,
         }
-    }
-
-    /// Get a reference to the database connection
-    /// 
-    /// # Returns
-    /// A locked mutex guard to the database
-    pub fn get_db(&self) -> std::sync::MutexGuard<Database> {
-        self.db.lock().expect("Failed to lock database mutex")
     }
 }
 

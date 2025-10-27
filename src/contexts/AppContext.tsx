@@ -1,8 +1,12 @@
 /**
  * Application context for sharing global state
+ * T048: 实现状态持久化（localStorage）
+ *
+ * 此 Context 作为桥接层，连接 Zustand stores 和 React 组件
  */
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSettingsStore, Theme, Language } from '@/stores';
 
 interface AppContextType {
   isDarkMode: boolean;
@@ -14,33 +18,60 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') return true;
-    if (saved === 'light') return false;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
+  const { theme, language, setTheme, setLanguage } = useSettingsStore();
   const { i18n } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
+  // 计算当前是否为暗色模式
+  const isDarkMode =
+    theme === 'dark' ||
+    (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  // 初始化语言设置
   useEffect(() => {
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (language !== i18n.language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language, i18n]);
+
+  // 应用主题到 DOM
+  useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
+  // 监听系统主题变化
+  useEffect(() => {
+    if (theme !== 'system') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      const newIsDark = mediaQuery.matches;
+      document.documentElement.setAttribute('data-theme', newIsDark ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme]);
+
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    const newTheme: Theme = isDarkMode ? 'light' : 'dark';
+    setTheme(newTheme);
   };
 
   const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-    setCurrentLanguage(lang);
-    localStorage.setItem('language', lang);
+    const validLang = lang === 'zh-CN' || lang === 'en-US' ? (lang as Language) : 'zh-CN';
+    setLanguage(validLang);
+    i18n.changeLanguage(validLang);
   };
 
   return (
-    <AppContext.Provider value={{ isDarkMode, toggleTheme, currentLanguage, changeLanguage }}>
+    <AppContext.Provider
+      value={{
+        isDarkMode,
+        toggleTheme,
+        currentLanguage: language,
+        changeLanguage,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
