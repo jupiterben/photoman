@@ -1,6 +1,7 @@
 // T076: 虚拟滚动网格组件（使用react-window）
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { FixedSizeGrid as Grid } from 'react-window';
+import { Grid } from 'react-window';
+import type { CellComponentProps } from 'react-window';
 import { Empty } from 'antd';
 import { PhotoCard } from './PhotoCard';
 import { useAppStore, usePhotoStore, useSettingsStore } from '@/stores';
@@ -10,6 +11,55 @@ import './PhotoGrid.css';
 interface PhotoGridProps {
   onPhotoClick?: (photo: Photo) => void;
 }
+
+// 定义传递给 Cell 组件的额外 props
+interface CellExtraProps {
+  photos: Photo[];
+  selectedPhotoIds: Set<number>;
+  thumbnailSize: 'small' | 'medium' | 'large';
+  cardGap: number;
+  columnCount: number;
+  handlePhotoSelect: (id: number, selected: boolean, event?: React.MouseEvent) => void;
+  onPhotoClick?: (photo: Photo) => void;
+}
+
+// Cell 组件
+const Cell = ({
+  columnIndex,
+  rowIndex,
+  style,
+  photos,
+  selectedPhotoIds,
+  thumbnailSize,
+  cardGap,
+  columnCount,
+  handlePhotoSelect,
+  onPhotoClick,
+}: CellComponentProps<CellExtraProps>) => {
+  const index = rowIndex * columnCount + columnIndex;
+  const photo = photos[index];
+
+  if (!photo) {
+    return <div style={style} />;
+  }
+
+  return (
+    <div
+      style={{
+        ...style,
+        padding: cardGap / 2,
+      }}
+    >
+      <PhotoCard
+        photo={photo}
+        selected={selectedPhotoIds.has(photo.id)}
+        size={thumbnailSize}
+        onSelect={(id, selected) => handlePhotoSelect(id, selected)}
+        onClick={onPhotoClick}
+      />
+    </div>
+  );
+};
 
 export function PhotoGrid({ onPhotoClick }: PhotoGridProps) {
   const { photos } = usePhotoStore();
@@ -82,44 +132,6 @@ export function PhotoGrid({ onPhotoClick }: PhotoGridProps) {
     [selectedPhotoIds, selectPhoto, togglePhotoSelection]
   );
 
-  // 渲染单元格
-  const Cell = useCallback(
-    ({ columnIndex, rowIndex, style }: any) => {
-      const index = rowIndex * getColumnCount(window.innerWidth) + columnIndex;
-      const photo = photos[index];
-
-      if (!photo) {
-        return null;
-      }
-
-      return (
-        <div
-          style={{
-            ...style,
-            padding: cardGap / 2,
-          }}
-        >
-          <PhotoCard
-            photo={photo}
-            selected={selectedPhotoIds.has(photo.id)}
-            size={thumbnailSize || 'medium'}
-            onSelect={(id, selected) => handlePhotoSelect(id, selected)}
-            onClick={onPhotoClick}
-          />
-        </div>
-      );
-    },
-    [
-      photos,
-      selectedPhotoIds,
-      thumbnailSize,
-      cardGap,
-      handlePhotoSelect,
-      onPhotoClick,
-      getColumnCount,
-    ]
-  );
-
   if (photos.length === 0) {
     return (
       <div className="photo-grid-empty">
@@ -131,21 +143,31 @@ export function PhotoGrid({ onPhotoClick }: PhotoGridProps) {
   const columnCount = getColumnCount(dimensions.width);
   const rowCount = getRowCount(columnCount);
 
+  // 准备传递给 Cell 的额外 props
+  const cellProps: CellExtraProps = {
+    photos,
+    selectedPhotoIds,
+    thumbnailSize: thumbnailSize || 'medium',
+    cardGap,
+    columnCount,
+    handlePhotoSelect,
+    onPhotoClick,
+  };
+
   return (
     <div className="photo-grid-container" ref={containerRef}>
       {dimensions.width > 0 && dimensions.height > 0 && (
         <Grid
+          cellComponent={Cell}
+          cellProps={cellProps}
           columnCount={columnCount}
           columnWidth={totalCardSize}
-          height={dimensions.height}
           rowCount={rowCount}
           rowHeight={totalCardSize}
-          width={dimensions.width}
-          overscanRowCount={2}
+          overscanCount={2}
           className="photo-grid"
-        >
-          {Cell}
-        </Grid>
+          style={{ width: dimensions.width, height: dimensions.height }}
+        />
       )}
     </div>
   );

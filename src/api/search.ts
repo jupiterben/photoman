@@ -83,3 +83,5 @@ export async function quickSearchPhotos(keyword: string, limit?: number): Promis
   return await invoke('quick_search_photos', { keyword, limit: limit ?? 20 });
 }
 
+
+

@@ -1,5 +1,5 @@
 // T082: 图片列表API
-import { invoke } from '@tauri-apps/api/core';
+// import { invoke } from '@tauri-apps/api/core';
 
 export interface Photo {
   id: number;
@@ -22,7 +22,7 @@ export interface Photo {
 /**
  * 获取照片列表
  */
-export async function getPhotos(limit?: number, offset?: number): Promise<Photo[]> {
+export async function getPhotos(_limit?: number, _offset?: number): Promise<Photo[]> {
   // TODO: 实现后端命令后取消注释
   // return await invoke<Photo[]>('get_photos', { limit, offset });
 
@@ -33,7 +33,7 @@ export async function getPhotos(limit?: number, offset?: number): Promise<Photo[
 /**
  * 获取照片详情
  */
-export async function getPhotoById(id: number): Promise<Photo | null> {
+export async function getPhotoById(_id: number): Promise<Photo | null> {
   // TODO: 实现后端命令后取消注释
   // return await invoke<Photo | null>('get_photo_by_id', { id });
 
@@ -43,7 +43,7 @@ export async function getPhotoById(id: number): Promise<Photo | null> {
 /**
  * 更新照片信息
  */
-export async function updatePhoto(photo: Partial<Photo> & { id: number }): Promise<void> {
+export async function updatePhoto(_photo: Partial<Photo> & { id: number }): Promise<void> {
   // TODO: 实现后端命令
   // return await invoke('update_photo', { photo });
 }
@@ -51,7 +51,7 @@ export async function updatePhoto(photo: Partial<Photo> & { id: number }): Promi
 /**
  * 删除照片（软删除）
  */
-export async function deletePhoto(id: number): Promise<void> {
+export async function deletePhoto(_id: number): Promise<void> {
   // TODO: 实现后端命令
   // return await invoke('delete_photo', { id });
 }
