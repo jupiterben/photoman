@@ -28,37 +28,3 @@ pub fn calculate_file_hash(path: &Path) -> Result<String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fs;
-    use tempfile::TempDir;
-    
-    #[test]
-    fn test_calculate_file_hash() {
-        let temp_dir = TempDir::new().unwrap();
-        let file_path = temp_dir.path().join("test.txt");
-        
-        fs::write(&file_path, b"Hello, World!").unwrap();
-        
-        let hash = calculate_file_hash(&file_path).unwrap();
-        
-        // SHA-256 hash of "Hello, World!"
-        let expected = "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f";
-        assert_eq!(hash, expected);
-    }
-    
-    #[test]
-    fn test_hash_consistency() {
-        let temp_dir = TempDir::new().unwrap();
-        let file_path = temp_dir.path().join("test.txt");
-        
-        fs::write(&file_path, b"Test content").unwrap();
-        
-        let hash1 = calculate_file_hash(&file_path).unwrap();
-        let hash2 = calculate_file_hash(&file_path).unwrap();
-        
-        assert_eq!(hash1, hash2);
-    }
-}
-

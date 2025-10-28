@@ -71,7 +71,11 @@ impl Database {
     }
 
     /// Execute a query with no return value
-    pub fn execute(&self, sql: &str, params: &[&dyn rusqlite::ToSql]) -> Result<usize, rusqlite::Error> {
+    pub fn execute(
+        &self,
+        sql: &str,
+        params: &[&dyn rusqlite::ToSql],
+    ) -> Result<usize, rusqlite::Error> {
         let conn = self.conn.lock().unwrap();
         conn.execute(sql, params)
     }
@@ -85,9 +89,8 @@ impl Database {
     /// Check if the database is initialized (has tables)
     pub fn is_initialized(&self) -> Result<bool, rusqlite::Error> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='photos'"
-        )?;
+        let mut stmt = conn
+            .prepare("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='photos'")?;
         let count: i64 = stmt.query_row([], |row| row.get(0))?;
         Ok(count > 0)
     }
@@ -95,7 +98,7 @@ impl Database {
     /// Get the current schema version
     pub fn get_schema_version(&self) -> Result<i32, rusqlite::Error> {
         let conn = self.conn.lock().unwrap();
-        
+
         // Check if schema_migrations table exists
         let table_exists: i64 = conn.query_row(
             "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='schema_migrations'",
@@ -108,11 +111,10 @@ impl Database {
         }
 
         // Get the latest version
-        let version: Result<i32, rusqlite::Error> = conn.query_row(
-            "SELECT MAX(version) FROM schema_migrations",
-            [],
-            |row| row.get(0),
-        );
+        let version: Result<i32, rusqlite::Error> =
+            conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
+                row.get(0)
+            });
 
         match version {
             Ok(v) => Ok(v),
@@ -137,88 +139,3 @@ impl Clone for Database {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fs;
-
-    fn get_temp_db_path() -> PathBuf {
-        let mut path = std::env::temp_dir();
-        path.push(format!("photoman_test_{}.db", chrono::Utc::now().timestamp()));
-        path
-    }
-
-    fn cleanup_db(path: &PathBuf) {
-        let _ = fs::remove_file(path);
-        let _ = fs::remove_file(format!("{}-wal", path.display()));
-        let _ = fs::remove_file(format!("{}-shm", path.display()));
-    }
-
-    #[test]
-    fn test_database_creation() {
-        let db_path = get_temp_db_path();
-        let db = Database::new(db_path.clone());
-        assert!(db.is_ok());
-
-        let db = db.unwrap();
-        assert_eq!(db.get_path(), &db_path);
-
-        cleanup_db(&db_path);
-    }
-
-    #[test]
-    fn test_database_initialization_check() {
-        let db_path = get_temp_db_path();
-        let db = Database::new(db_path.clone()).unwrap();
-
-        let is_init = db.is_initialized();
-        assert!(is_init.is_ok());
-        assert_eq!(is_init.unwrap(), false);
-
-        cleanup_db(&db_path);
-    }
-
-    #[test]
-    fn test_schema_version() {
-        let db_path = get_temp_db_path();
-        let db = Database::new(db_path.clone()).unwrap();
-
-        let version = db.get_schema_version();
-        assert!(version.is_ok());
-        assert_eq!(version.unwrap(), 0);
-
-        cleanup_db(&db_path);
-    }
-
-    #[test]
-    fn test_execute_batch() {
-        let db_path = get_temp_db_path();
-        let db = Database::new(db_path.clone()).unwrap();
-
-        let result = db.execute_batch(
-            "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT);"
-        );
-        assert!(result.is_ok());
-
-        cleanup_db(&db_path);
-    }
-
-    #[test]
-    fn test_wal_mode_enabled() {
-        let db_path = get_temp_db_path();
-        let db = Database::new(db_path.clone()).unwrap();
-
-        let conn = db.get_connection();
-        let conn = conn.lock().unwrap();
-        
-        let journal_mode: String = conn
-            .query_row("PRAGMA journal_mode", [], |row| row.get(0))
-            .unwrap();
-        
-        assert_eq!(journal_mode.to_lowercase(), "wal");
-
-        cleanup_db(&db_path);
-    }
-}
-

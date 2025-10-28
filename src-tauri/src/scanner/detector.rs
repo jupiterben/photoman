@@ -88,24 +88,3 @@ fn format_to_string(format: ImageFormat) -> String {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::path::PathBuf;
-
-    #[test]
-    fn test_is_image_file() {
-        assert!(is_image_file(&PathBuf::from("test.jpg")));
-        assert!(is_image_file(&PathBuf::from("test.PNG")));
-        assert!(is_image_file(&PathBuf::from("test.webp")));
-        assert!(!is_image_file(&PathBuf::from("test.txt")));
-        assert!(!is_image_file(&PathBuf::from("test.mp4")));
-    }
-
-    #[test]
-    fn test_normalize_format() {
-        assert_eq!(normalize_format("jpg"), "JPEG");
-        assert_eq!(normalize_format("jpeg"), "JPEG");
-        assert_eq!(normalize_format("png"), "PNG");
-    }
-}

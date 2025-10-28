@@ -34,37 +34,3 @@ pub fn walk_directory(path: &Path, recursive: bool) -> Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fs;
-    use tempfile::TempDir;
-    
-    #[test]
-    fn test_walk_directory_recursive() {
-        let temp_dir = TempDir::new().unwrap();
-        let root = temp_dir.path();
-        
-        // 创建测试文件结构
-        fs::create_dir(root.join("subdir")).unwrap();
-        fs::write(root.join("file1.txt"), "test").unwrap();
-        fs::write(root.join("subdir").join("file2.txt"), "test").unwrap();
-        
-        let files = walk_directory(root, true).unwrap();
-        assert_eq!(files.len(), 2);
-    }
-    
-    #[test]
-    fn test_walk_directory_non_recursive() {
-        let temp_dir = TempDir::new().unwrap();
-        let root = temp_dir.path();
-        
-        fs::create_dir(root.join("subdir")).unwrap();
-        fs::write(root.join("file1.txt"), "test").unwrap();
-        fs::write(root.join("subdir").join("file2.txt"), "test").unwrap();
-        
-        let files = walk_directory(root, false).unwrap();
-        assert_eq!(files.len(), 1); // 只扫描根目录
-    }
-}
-

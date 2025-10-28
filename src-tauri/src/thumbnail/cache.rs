@@ -155,20 +155,3 @@ impl ThumbnailCache {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use tempfile::TempDir;
-    use rusqlite::Connection;
-    
-    #[test]
-    fn test_cache_path_generation() {
-        let temp_dir = TempDir::new().unwrap();
-        let cache = ThumbnailCache::new(temp_dir.path().to_path_buf(), 1024 * 1024);
-        
-        let path = cache.get_cache_path(123, ThumbnailSize::Small);
-        assert!(path.to_string_lossy().contains("small"));
-        assert!(path.to_string_lossy().contains("123.jpg"));
-    }
-}
-

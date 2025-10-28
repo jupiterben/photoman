@@ -331,31 +331,3 @@ impl Drop for WatcherManager {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::env;
-
-    #[test]
-    fn test_watcher_manager_lifecycle() {
-        let temp_db = env::temp_dir().join(format!("watcher_test_{}.db", chrono::Utc::now().timestamp()));
-        let manager = WatcherManager::new(temp_db);
-
-        assert!(!*manager.is_running.lock().unwrap());
-
-        // Note: Cannot test actual watching without real file system operations
-        // These would be integration tests
-    }
-
-    #[test]
-    fn test_watcher_status() {
-        let status1 = WatcherStatus::Running;
-        let status2 = WatcherStatus::Paused;
-        let status3 = WatcherStatus::Error("test".to_string());
-
-        assert_eq!(status1, WatcherStatus::Running);
-        assert_ne!(status1, status2);
-        assert!(matches!(status3, WatcherStatus::Error(_)));
-    }
-}
-

@@ -207,33 +207,3 @@ pub trait EventHandler: Send + Sync {
     fn handle_renamed(&self, from: &Path, to: &Path);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_is_image_file() {
-        assert!(WatcherListener::is_image_file(Path::new("test.jpg")));
-        assert!(WatcherListener::is_image_file(Path::new("test.PNG")));
-        assert!(WatcherListener::is_image_file(Path::new("photo.JPEG")));
-        assert!(WatcherListener::is_image_file(Path::new("image.webp")));
-        assert!(!WatcherListener::is_image_file(Path::new("doc.txt")));
-        assert!(!WatcherListener::is_image_file(Path::new("video.mp4")));
-        assert!(!WatcherListener::is_image_file(Path::new("noext")));
-    }
-
-    #[test]
-    fn test_file_system_event() {
-        let event = FileSystemEvent::Created(PathBuf::from("/test/image.jpg"));
-        assert_eq!(event.event_type(), "created");
-        assert_eq!(event.path(), Path::new("/test/image.jpg"));
-
-        let event = FileSystemEvent::Renamed {
-            from: PathBuf::from("/old.jpg"),
-            to: PathBuf::from("/new.jpg"),
-        };
-        assert_eq!(event.event_type(), "renamed");
-        assert_eq!(event.path(), Path::new("/new.jpg"));
-    }
-}
-

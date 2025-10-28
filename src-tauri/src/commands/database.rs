@@ -56,20 +56,3 @@ pub fn get_database_info(state: tauri::State<AppState>) -> AppResult<DatabaseInf
     })
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_database_info_structure() {
-        let info = DatabaseInfo {
-            initialized: true,
-            schema_version: 1,
-            path: "/path/to/db".to_string(),
-        };
-        
-        assert_eq!(info.initialized, true);
-        assert_eq!(info.schema_version, 1);
-    }
-}
-

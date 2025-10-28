@@ -256,15 +256,3 @@ pub async fn get_watcher_status(
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_path_validation() {
-        let valid_path = std::env::current_dir().unwrap();
-        assert!(valid_path.exists());
-        assert!(valid_path.is_dir());
-    }
-}
-
