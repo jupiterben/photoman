@@ -10,25 +10,26 @@
 
 ## 任务统计
 
-- **总任务数**: 147个任务
-- **并行任务**: 38个（标记为[P]）
+- **总任务数**: 184个任务（新增监控目录管理 37个任务）
+- **并行任务**: 41个（标记为[P]）
 - **用户故事数**: 4个核心场景
-- **预计MVP**: 用户故事1（导入和浏览）+ 基础UI
+- **预计MVP**: 用户故事1（监控目录和浏览）+ 基础UI
 
 ## 实施策略
 
 ### MVP优先原则
 
-**MVP范围**（Phase 1-3，约4-6周）:
+**MVP范围**（Phase 1-3，约6-8周）:
 
 1. 项目搭建和基础架构
-2. 图片扫描和导入
-3. 基础浏览（网格视图）
-4. 简单的图片查看
+2. 监控目录管理和实时同步
+3. 图片扫描和索引
+4. 基础浏览（网格视图）
+5. 简单的图片查看
 
 **增量交付顺序**:
 
-1. MVP: 能导入和浏览图片
+1. MVP: 能添加监控目录并自动同步浏览图片
 2. US2: 添加标签组织功能
 3. US3: 添加搜索功能
 4. US4: 添加删除和回收站
@@ -133,21 +134,84 @@
 - [x] T047 [P] 实现设置状态store（src/stores/settingsStore.ts）
 - [x] T048 实现状态持久化（localStorage）
 
+### 2.5 监控目录管理
+
+**目标**: 实现文件系统监控目录的添加、管理和实时同步功能
+
+**前置条件**: Phase 2.1-2.4 完成
+
+**工期**: 2周
+
+#### 2.5.1 监控目录数据层 (Rust后端)
+
+- [x] T172 创建WatchedDirectory实体（src-tauri/src/database/models.rs）
+- [x] T173 实现watched_directories表迁移（src-tauri/src/database/migrations/）
+- [x] T174 实现WatchedDirectory DAO（src-tauri/src/database/watched_directories.rs）
+- [x] T175 实现CRUD操作（create、read、update、delete、list）
+- [x] T176 实现监控状态更新（active、paused、error）
+- [x] T177 实现统计信息查询（图片数量、最后同步时间）
+
+#### 2.5.2 文件系统监控 (Rust后端)
+
+- [ ] T178 配置notify crate依赖（Cargo.toml）
+- [ ] T179 创建watcher模块（src-tauri/src/watcher/mod.rs）
+- [ ] T180 实现文件系统事件监听器（src-tauri/src/watcher/listener.rs）
+- [ ] T181 实现事件处理器（新增、修改、删除文件）
+- [ ] T182 实现监控器生命周期管理（启动、暂停、恢复、停止）
+- [ ] T183 实现多目录并发监控
+- [ ] T184 实现监控状态同步到数据库
+- [ ] T185 实现文件变化事件发送到前端（Tauri事件）
+
+#### 2.5.3 监控目录命令 (Rust后端)
+
+- [ ] T186 实现add_watched_directory命令（src-tauri/src/commands/watcher.rs）
+- [ ] T187 实现remove_watched_directory命令
+- [ ] T188 实现pause_watched_directory命令
+- [ ] T189 实现resume_watched_directory命令
+- [ ] T190 实现get_watched_directories命令
+- [ ] T191 实现get_watched_directory_stats命令
+- [ ] T192 实现rescan_watched_directory命令（手动触发重新扫描）
+- [ ] T193 集成监控器到应用启动流程
+
+#### 2.5.4 前端 - 监控目录管理页面
+
+- [ ] T194 [P] 实现监控目录列表组件（src/components/WatchedDirectoryList.tsx）
+- [ ] T195 [P] 实现添加监控目录对话框（src/components/AddWatchDirectoryDialog.tsx）
+- [ ] T196 [P] 实现监控目录卡片组件（src/components/WatchDirectoryCard.tsx）
+- [ ] T197 实现监控目录管理页面（src/pages/WatchedDirectories.tsx）
+- [ ] T198 实现监控状态指示器（active、paused、error）
+- [ ] T199 实现监控目录操作（暂停、恢复、移除、重新扫描）
+- [ ] T200 实现监控目录状态管理（src/stores/watcherStore.ts）
+- [ ] T201 实现监控目录API封装（src/api/watcher.ts）
+- [ ] T202 集成实时文件变化通知到UI
+
+#### 2.5.5 集成和优化
+
+- [ ] T203 更新扫描命令以支持监控目录模式
+- [ ] T204 实现首次扫描完成后自动启动监控
+- [ ] T205 实现监控目录配置持久化
+- [ ] T206 实现错误恢复机制（监控失败时重试）
+- [ ] T207 优化监控性能（防抖、批量处理）
+- [ ] T208 编写监控模块单元测试
+
 ---
 
-## Phase 3: 用户故事1 - 导入和初次浏览 [US1]
+## Phase 3: 用户故事1 - 添加监控目录并浏览 [US1]
 
-**目标**: 用户能够导入图片并在网格视图中浏览
+**目标**: 用户能够添加监控目录，系统自动同步图片并在网格视图中浏览
 
 **优先级**: P1（必须，MVP核心）
 
 **独立测试标准**:
 
-- ✅ 用户可以选择文件夹并开始扫描
+- ✅ 用户可以添加监控目录并开始首次扫描
 - ✅ 扫描进度实时显示
+- ✅ 扫描完成后自动启动文件系统监控
+- ✅ 新增/删除/修改的图片自动同步（延迟<5秒）
 - ✅ 扫描完成后显示所有图片的缩略图网格
 - ✅ 网格视图流畅滚动（10000+张图片）
 - ✅ 点击图片可查看大图
+- ✅ 监控目录状态实时更新
 
 **工期**: 4周
 
@@ -299,7 +363,7 @@
 - [x] T118 [US3] 实现search_photos命令（src-tauri/src/commands/search.rs）
 - [x] T119 [US3] 实现高级筛选逻辑
 - [x] T120 [US3] 实现组合查询构建器
-- [ ] T121 [US3] 优化搜索性能（索引、缓存）
+- [x] T121 [US3] 优化搜索性能（索引、缓存）
 - [ ] T122 [US3] 编写搜索模块单元测试
 
 ### 5.2 前端 - 搜索UI
@@ -340,21 +404,21 @@
 
 ### 6.1 回收站逻辑 (Rust后端)
 
-- [ ] T133 [US4] 实现软删除命令（src-tauri/src/commands/recycle.rs）
-- [ ] T134 [US4] 实现恢复命令
-- [ ] T135 [US4] 实现永久删除命令
-- [ ] T136 [US4] 实现回收站清理任务（定期清理30天前的）
-- [ ] T137 [US4] 实现回收站查询（src-tauri/src/database/recycle.rs）
+- [x] T133 [US4] 实现软删除命令（src-tauri/src/commands/recycle.rs）
+- [x] T134 [US4] 实现恢复命令
+- [x] T135 [US4] 实现永久删除命令
+- [x] T136 [US4] 实现回收站清理任务（定期清理30天前的）
+- [x] T137 [US4] 实现回收站查询（src-tauri/src/database/recycle.rs）
 - [ ] T138 [US4] 编写回收站模块单元测试
 
 ### 6.2 前端 - 回收站UI
 
-- [ ] T139 [P] [US4] 实现删除确认对话框（src/components/DeleteConfirm.tsx）
-- [ ] T140 [P] [US4] 实现回收站页面（src/pages/RecycleBin.tsx）
-- [ ] T141 [P] [US4] 实现恢复操作UI
-- [ ] T142 [P] [US4] 实现清空回收站UI
-- [ ] T143 [US4] 实现回收站状态管理（src/stores/recycleStore.ts）
-- [ ] T144 [US4] 实现回收站API封装（src/api/recycle.ts）
+- [x] T139 [P] [US4] 实现删除确认对话框（src/components/DeleteConfirm.tsx）
+- [x] T140 [P] [US4] 实现回收站页面（src/pages/RecycleBin.tsx）
+- [x] T141 [P] [US4] 实现恢复操作UI
+- [x] T142 [P] [US4] 实现清空回收站UI
+- [x] T143 [US4] 实现回收站状态管理（src/stores/recycleStore.ts）
+- [x] T144 [US4] 实现回收站API封装（src/api/recycle.ts）
 
 ### 6.3 集成测试 [US4]
 
@@ -387,19 +451,19 @@
 
 ### 7.3 UI/UX打磨
 
-- [ ] T157 加载状态优化
-- [ ] T158 错误提示优化
-- [ ] T159 空状态设计
-- [ ] T160 动画和过渡效果
+- [x] T157 加载状态优化
+- [x] T158 错误提示优化
+- [x] T159 空状态设计
+- [x] T160 动画和过渡效果
 - [ ] T161 快捷入门引导
 
 ### 7.4 文档完善
 
 - [ ] T162 编写用户手册
-- [ ] T163 编写快速入门指南
+- [x] T163 编写快速入门指南
 - [ ] T164 编写FAQ文档
 - [ ] T165 编写API文档（插件开发）
-- [ ] T166 编写变更日志
+- [x] T166 编写变更日志
 
 ### 7.5 打包和发布
 
@@ -416,9 +480,9 @@
 ```
 Phase 1 (Setup)
     ↓
-Phase 2 (Foundation)
+Phase 2 (Foundation + 监控目录管理)
     ↓
-    ├─→ Phase 3 (US1: 导入和浏览) ← MVP核心
+    ├─→ Phase 3 (US1: 监控目录和浏览) ← MVP核心
     │       ↓
     │   ├─→ Phase 4 (US2: 标签组织)
     │   │
@@ -433,9 +497,9 @@ Phase 7 (打磨发布)
 
 ```
 T001-T022 (Setup) → T023-T048 (Foundation) →
-T049-T090 (US1) → T091-T115 (US2) →
-T116-T132 (US3) → T133-T147 (US4) →
-T148-T171 (发布)
+T172-T208 (监控目录管理) → T049-T090 (US1) →
+T091-T115 (US2) → T116-T132 (US3) →
+T133-T147 (US4) → T148-T171 (发布)
 ```
 
 ## 并行执行示例
@@ -447,6 +511,19 @@ T148-T171 (发布)
 Group 1: T006, T007, T008, T009, T010  # 前端配置
 Group 2: T011, T012, T013, T014        # 后端配置
 Group 3: T019, T020, T021              # 测试框架
+```
+
+### 监控目录管理阶段并行
+
+```bash
+# 前端和后端可并行开发
+Backend Group 1: T172-T177  # 数据层
+Backend Group 2: T178-T185  # 文件系统监控
+Backend Group 3: T186-T193  # 命令层
+Frontend: T194-T202         # UI组件
+
+# 前端UI组件并行
+Group 1: T194, T195, T196   # 监控目录列表和卡片
 ```
 
 ### US1阶段并行
@@ -466,12 +543,16 @@ Group 3: T083, T084, T085  # 详情UI组件
 
 在发布MVP前，确保以下功能完整可用：
 
-- [ ] 用户可以选择文件夹并导入图片
-- [ ] 扫描进度实时显示
+- [ ] 用户可以添加监控目录
+- [ ] 首次扫描进度实时显示
+- [ ] 扫描完成后自动启动文件系统监控
+- [ ] 新增/删除文件自动同步（延迟<5秒）
+- [ ] 监控目录状态正常显示（active、paused、error）
 - [ ] 网格视图流畅显示缩略图
 - [ ] 支持10000+张图片流畅浏览
 - [ ] 点击图片可查看大图
 - [ ] 支持键盘导航
+- [ ] 可以暂停、恢复、移除监控目录
 - [ ] 应用启动时间<3秒
 - [ ] 界面响应流畅（无明显卡顿）
 - [ ] 跨平台基本功能正常
@@ -516,6 +597,7 @@ Group 3: T083, T084, T085  # 详情UI组件
 ---
 
 **生成日期**: 2025-10-24  
-**总任务数**: 171个  
-**预计工期**: 21周  
+**最后更新**: 2025-10-28（新增监控目录管理任务）  
+**总任务数**: 208个（包含37个监控目录管理任务）  
+**预计工期**: 23周（约5.5个月）  
 **建议团队**: 2-3名开发者（1名Rust后端 + 1-2名前端/全栈）

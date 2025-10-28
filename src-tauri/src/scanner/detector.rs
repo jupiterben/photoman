@@ -1,19 +1,32 @@
 // T051: 实现图片格式检测（使用image crate）
-use std::path::Path;
-use image::ImageFormat;
 use crate::error::{PhotoManError, Result};
+use image::ImageFormat;
+use std::path::Path;
 
 /// 支持的图片格式
 const SUPPORTED_FORMATS: &[&str] = &[
-    "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff", "tif", "ico"
+    "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff", "tif", "ico",
 ];
 
 /// 检测文件是否为图片
 pub fn is_image_file(path: &Path) -> bool {
     if let Some(ext) = path.extension() {
-        let ext_lower = ext.to_string_lossy().to_lowercase();
-        return SUPPORTED_FORMATS.contains(&ext_lower.as_str());
+        let ext_lower: String = ext.to_string_lossy().to_lowercase();
+        let is_supported = SUPPORTED_FORMATS.contains(&ext_lower.as_str());
+
+        // 添加调试日志
+        log::debug!(
+            "检查文件: {:?}, 扩展名: {}, 是否支持: {}",
+            path,
+            ext_lower,
+            is_supported
+        );
+
+        return is_supported;
     }
+
+    // 没有扩展名的文件
+    log::debug!("文件无扩展名，跳过: {:?}", path);
     false
 }
 
@@ -26,13 +39,13 @@ pub fn get_image_format(path: &Path) -> Result<String> {
             return Ok(normalize_format(&ext_lower));
         }
     }
-    
+
     // 如果扩展名不支持，尝试读取文件头判断
     let reader = image::io::Reader::open(path)
         .map_err(|e| PhotoManError::image_error(format!("无法打开图片: {}", e)))?;
-    
+
     let format = reader.format();
-    
+
     if let Some(fmt) = format {
         Ok(format_to_string(fmt))
     } else {
@@ -44,7 +57,7 @@ pub fn get_image_format(path: &Path) -> Result<String> {
 pub fn get_image_dimensions(path: &Path) -> Result<(u32, u32)> {
     let img = image::open(path)
         .map_err(|e| PhotoManError::image_error(format!("无法读取图片: {}", e)))?;
-    
+
     Ok((img.width(), img.height()))
 }
 
@@ -79,7 +92,7 @@ fn format_to_string(format: ImageFormat) -> String {
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    
+
     #[test]
     fn test_is_image_file() {
         assert!(is_image_file(&PathBuf::from("test.jpg")));
@@ -88,7 +101,7 @@ mod tests {
         assert!(!is_image_file(&PathBuf::from("test.txt")));
         assert!(!is_image_file(&PathBuf::from("test.mp4")));
     }
-    
+
     #[test]
     fn test_normalize_format() {
         assert_eq!(normalize_format("jpg"), "JPEG");
@@ -96,4 +109,3 @@ mod tests {
         assert_eq!(normalize_format("png"), "PNG");
     }
 }
-

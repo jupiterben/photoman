@@ -236,6 +236,81 @@ pub struct SmartAlbum {
     pub updated_at: String,
 }
 
+// ==================== WatchedDirectory ====================
+
+/// 监控目录实体
+/// 用于管理文件系统实时监控的目录
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WatchedDirectory {
+    pub id: Option<i64>,
+    pub directory_path: String,
+    pub recursive: bool,
+    pub status: String, // "active", "paused", "error"
+    pub photo_count: i32,
+    pub error_message: Option<String>,
+    pub created_at: String,
+    pub last_synced_at: Option<String>,
+    pub updated_at: String,
+}
+
+impl WatchedDirectory {
+    pub fn new(directory_path: String, recursive: bool) -> Self {
+        let now = chrono::Utc::now().to_rfc3339();
+        Self {
+            id: None,
+            directory_path,
+            recursive,
+            status: "active".to_string(),
+            photo_count: 0,
+            error_message: None,
+            created_at: now.clone(),
+            last_synced_at: None,
+            updated_at: now,
+        }
+    }
+
+    pub fn validate(&self) -> Result<(), String> {
+        if self.directory_path.trim().is_empty() {
+            return Err("目录路径不能为空".to_string());
+        }
+        
+        let valid_statuses = ["active", "paused", "error"];
+        if !valid_statuses.contains(&self.status.as_str()) {
+            return Err("状态必须是 active、paused 或 error".to_string());
+        }
+        
+        if self.photo_count < 0 {
+            return Err("图片数量不能为负数".to_string());
+        }
+        
+        if self.status == "error" && self.error_message.is_none() {
+            return Err("错误状态必须包含错误消息".to_string());
+        }
+        
+        Ok(())
+    }
+
+    /// 更新监控状态
+    pub fn set_status(&mut self, status: &str, error_message: Option<String>) {
+        self.status = status.to_string();
+        self.error_message = error_message;
+        self.updated_at = chrono::Utc::now().to_rfc3339();
+    }
+
+    /// 更新图片数量
+    pub fn update_photo_count(&mut self, count: i32) {
+        self.photo_count = count;
+        self.updated_at = chrono::Utc::now().to_rfc3339();
+    }
+
+    /// 标记已同步
+    pub fn mark_synced(&mut self) {
+        let now = chrono::Utc::now().to_rfc3339();
+        self.last_synced_at = Some(now.clone());
+        self.updated_at = now;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -289,6 +364,39 @@ mod tests {
         album.name = "测试".to_string();
         album.sort_order = "invalid".to_string();
         assert!(album.validate().is_err());
+    }
+
+    #[test]
+    fn test_watched_directory() {
+        let mut dir = WatchedDirectory::new("/path/to/photos".to_string(), true);
+        assert!(dir.validate().is_ok());
+        assert_eq!(dir.status, "active");
+        assert_eq!(dir.photo_count, 0);
+        assert!(dir.recursive);
+
+        // Test status update
+        dir.set_status("paused", None);
+        assert_eq!(dir.status, "paused");
+
+        // Test error status requires message
+        dir.set_status("error", None);
+        assert!(dir.validate().is_err());
+
+        dir.set_status("error", Some("Test error".to_string()));
+        assert!(dir.validate().is_ok());
+
+        // Test photo count update
+        dir.update_photo_count(100);
+        assert_eq!(dir.photo_count, 100);
+
+        // Test invalid photo count
+        dir.photo_count = -1;
+        assert!(dir.validate().is_err());
+
+        // Test mark synced
+        dir.photo_count = 50;
+        dir.mark_synced();
+        assert!(dir.last_synced_at.is_some());
     }
 }
 

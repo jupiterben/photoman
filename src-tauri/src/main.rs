@@ -75,7 +75,14 @@ fn main() {
             commands::get_photos_by_any_tags,
             commands::get_photos_by_all_tags,
             commands::search_photos,
-            commands::quick_search_photos
+            commands::quick_search_photos,
+            commands::soft_delete_photos,
+            commands::restore_photos,
+            commands::permanently_delete_photos,
+            commands::get_recycle_bin_photos,
+            commands::clean_expired_recycle_bin,
+            commands::empty_recycle_bin,
+            commands::get_recycle_bin_stats
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

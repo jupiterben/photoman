@@ -9,11 +9,23 @@ pub struct Migration {
 
 /// Get all migrations in order
 pub fn get_migrations() -> Vec<Migration> {
-    vec![Migration {
-        version: 1,
-        name: "initial_schema",
-        up: migration_001_initial_schema,
-    }]
+    vec![
+        Migration {
+            version: 1,
+            name: "initial_schema",
+            up: migration_001_initial_schema,
+        },
+        Migration {
+            version: 2,
+            name: "optimize_search_performance",
+            up: migration_002_optimize_search,
+        },
+        Migration {
+            version: 3,
+            name: "add_watched_directories",
+            up: migration_003_add_watched_directories,
+        },
+    ]
 }
 
 /// Migration 001: Initial schema
@@ -292,7 +304,6 @@ fn get_current_version(conn: &Connection) -> Result<i32, rusqlite::Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
 
     fn get_temp_db() -> Connection {
         let mut path = std::env::temp_dir();
@@ -388,5 +399,143 @@ mod tests {
         );
         assert!(result.is_err());
     }
+}
+
+/// Migration 002: T121 - Optimize search performance
+/// Adds composite indexes and full-text search capabilities
+fn migration_002_optimize_search(conn: &Connection) -> Result<(), rusqlite::Error> {
+    log::info!("Running migration 002: optimize_search_performance");
+
+    conn.execute_batch(
+        "
+        -- ==================== Search Performance Optimization ====================
+        
+        -- Composite index for common search queries (file name + deleted flag)
+        CREATE INDEX IF NOT EXISTS idx_photos_search_name 
+            ON photos(is_deleted, file_name COLLATE NOCASE);
+        
+        -- Composite index for date range searches
+        CREATE INDEX IF NOT EXISTS idx_photos_search_date 
+            ON photos(is_deleted, taken_at DESC);
+        
+        -- Composite index for size filtering
+        CREATE INDEX IF NOT EXISTS idx_photos_search_size 
+            ON photos(is_deleted, file_size);
+        
+        -- Composite index for format + deleted
+        CREATE INDEX IF NOT EXISTS idx_photos_search_format 
+            ON photos(is_deleted, format);
+        
+        -- Composite index for favorite + deleted
+        CREATE INDEX IF NOT EXISTS idx_photos_search_favorite 
+            ON photos(is_deleted, is_favorite, first_scanned_at DESC);
+        
+        -- Composite index for rating searches
+        CREATE INDEX IF NOT EXISTS idx_photos_search_rating 
+            ON photos(is_deleted, rating DESC, first_scanned_at DESC);
+        
+        -- Full-text search virtual table for file names and metadata
+        CREATE VIRTUAL TABLE IF NOT EXISTS photos_fts USING fts5(
+            file_name,
+            title,
+            description,
+            content=photos,
+            content_rowid=id
+        );
+        
+        -- Populate FTS table with existing data
+        INSERT INTO photos_fts(rowid, file_name, title, description)
+        SELECT id, file_name, title, description FROM photos WHERE is_deleted = 0;
+        
+        -- Triggers to keep FTS table in sync
+        CREATE TRIGGER IF NOT EXISTS photos_fts_insert AFTER INSERT ON photos BEGIN
+            INSERT INTO photos_fts(rowid, file_name, title, description)
+            VALUES (new.id, new.file_name, new.title, new.description);
+        END;
+        
+        CREATE TRIGGER IF NOT EXISTS photos_fts_update AFTER UPDATE ON photos BEGIN
+            UPDATE photos_fts 
+            SET file_name = new.file_name, 
+                title = new.title, 
+                description = new.description
+            WHERE rowid = new.id;
+        END;
+        
+        CREATE TRIGGER IF NOT EXISTS photos_fts_delete AFTER DELETE ON photos BEGIN
+            DELETE FROM photos_fts WHERE rowid = old.id;
+        END;
+        
+        -- ==================== Tag Search Optimization ====================
+        
+        -- Composite index for tag search performance
+        CREATE INDEX IF NOT EXISTS idx_photo_tags_search 
+            ON photo_tags(tag_id, photo_id);
+        
+        -- ==================== Record Migration ====================
+        INSERT INTO schema_migrations (version, name, applied_at)
+        VALUES (2, 'optimize_search_performance', datetime('now'));
+        ",
+    )?;
+
+    log::info!("Migration 002 completed successfully");
+    Ok(())
+}
+
+/// Migration 003: T173 - Add watched directories
+/// Creates watched_directories table for real-time directory monitoring
+fn migration_003_add_watched_directories(conn: &Connection) -> Result<(), rusqlite::Error> {
+    log::info!("Running migration 003: add_watched_directories");
+
+    conn.execute_batch(
+        "
+        -- ==================== Watched Directories Table ====================
+        
+        CREATE TABLE IF NOT EXISTS watched_directories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            directory_path TEXT NOT NULL UNIQUE,
+            recursive BOOLEAN NOT NULL DEFAULT 1,
+            status TEXT NOT NULL DEFAULT 'active',
+            photo_count INTEGER NOT NULL DEFAULT 0,
+            error_message TEXT,
+            created_at TEXT NOT NULL,
+            last_synced_at TEXT,
+            updated_at TEXT NOT NULL,
+            
+            CONSTRAINT chk_status CHECK (status IN ('active', 'paused', 'error')),
+            CONSTRAINT chk_photo_count CHECK (photo_count >= 0),
+            CONSTRAINT chk_error CHECK (
+                (status = 'error' AND error_message IS NOT NULL) OR
+                (status != 'error')
+            )
+        );
+
+        -- Watched directories indexes
+        CREATE INDEX IF NOT EXISTS idx_watched_directories_status 
+            ON watched_directories(status);
+        CREATE INDEX IF NOT EXISTS idx_watched_directories_path 
+            ON watched_directories(directory_path);
+        CREATE INDEX IF NOT EXISTS idx_watched_directories_last_synced 
+            ON watched_directories(last_synced_at);
+
+        -- Add watched_directory_id to scan_jobs table (optional, for tracking)
+        ALTER TABLE scan_jobs ADD COLUMN watched_directory_id INTEGER 
+            REFERENCES watched_directories(id) ON DELETE SET NULL;
+        CREATE INDEX IF NOT EXISTS idx_scan_jobs_watched_dir 
+            ON scan_jobs(watched_directory_id);
+
+        -- Add watched_directory_id to photos table (for tracking source)
+        ALTER TABLE photos ADD COLUMN watched_directory_id INTEGER 
+            REFERENCES watched_directories(id) ON DELETE SET NULL;
+        CREATE INDEX IF NOT EXISTS idx_photos_watched_dir 
+            ON photos(watched_directory_id);
+        
+        -- ==================== Record Migration ====================
+        INSERT INTO schema_migrations (version, name, applied_at)
+        VALUES (3, 'add_watched_directories', datetime('now'));
+        ",
+    )?;
+
+    log::info!("Migration 003 completed successfully");
+    Ok(())
 }
 

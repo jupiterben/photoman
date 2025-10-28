@@ -7,12 +7,13 @@ import Home from '@/pages/Home';
 import Photos from '@/pages/Photos';
 import Settings from '@/pages/Settings';
 import SearchResults from '@/pages/SearchResults';
+import RecycleBin from '@/pages/RecycleBin';
 
 // Placeholder components for routes that will be implemented later
 const Favorites = () => <div>收藏页面 - 待实现</div>;
+const WatchedDirectories = () => <div>监控目录管理 - 待实现</div>;
 const Tags = () => <div>标签页面 - 待实现</div>;
 const Albums = () => <div>相册页面 - 待实现</div>;
-const Trash = () => <div>回收站 - 待实现</div>;
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
         element: <Favorites />,
       },
       {
+        path: 'watched-directories',
+        element: <WatchedDirectories />,
+      },
+      {
         path: 'tags',
         element: <Tags />,
       },
@@ -45,7 +50,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'trash',
-        element: <Trash />,
+        element: <RecycleBin />,
       },
       {
         path: 'settings',

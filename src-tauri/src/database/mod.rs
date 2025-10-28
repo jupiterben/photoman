@@ -8,6 +8,7 @@ pub mod photos;
 pub mod scan_jobs;
 pub mod tags;
 pub mod photo_tags;
+pub mod watched_directories;
 
 pub use connection::Database;
 

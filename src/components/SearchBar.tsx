@@ -150,3 +150,5 @@ export function SearchBar({ onAdvancedFilterClick, showAdvancedFilter = true }: 
 
 
 
+
+

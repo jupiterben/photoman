@@ -29,6 +29,7 @@
     "home": "Home",
     "allPhotos": "All Photos",
     "favorites": "Favorites",
+    "watchedDirectories": "Watch Directories",
     "tags": "Tags",
     "albums": "Albums",
     "trash": "Trash",
@@ -37,6 +38,7 @@
   "toolbar": {
     "search": "Search photos...",
     "import": "Import Photos",
+    "addWatchDirectory": "Add Watch Directory",
     "toggleTheme": "Toggle Theme",
     "language": "Language"
   },

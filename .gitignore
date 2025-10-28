@@ -26,7 +26,6 @@ Cargo.lock
 *.env
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -65,3 +64,4 @@ desktop.ini
 *.bak
 *.backup
 
+/pnpm-lock.yaml

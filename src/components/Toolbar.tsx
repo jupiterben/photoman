@@ -41,9 +41,10 @@ function Toolbar({
     onLanguageChange?.(lang);
   };
 
-  const handleImportClick = async () => {
+  const handleAddWatchDirectory = async () => {
+    // 添加监控目录，系统将自动监控该目录的文件变化
     await startImport(onImportComplete);
-    // 扫描在后台进行，不需要等待
+    // 首次扫描在后台进行，后续文件变化将实时检测
   };
 
   const languageMenuItems = [
@@ -72,10 +73,10 @@ function Toolbar({
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={handleImportClick}
+            onClick={handleAddWatchDirectory}
             loading={isSelecting}
           >
-            {t('toolbar.import', '导入图片')}
+            {t('toolbar.addWatchDirectory', '添加监控目录')}
           </Button>
 
           <Button

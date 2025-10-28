@@ -37,6 +37,7 @@
     "home": "首页",
     "allPhotos": "所有图片",
     "favorites": "收藏",
+    "watchedDirectories": "监控目录",
     "tags": "标签",
     "albums": "相册",
     "trash": "回收站",
@@ -45,6 +46,7 @@
   "toolbar": {
     "search": "搜索图片...",
     "import": "导入图片",
+    "addWatchDirectory": "添加监控目录",
     "toggleTheme": "切换主题",
     "language": "语言"
   },

@@ -29,7 +29,6 @@ impl SearchEngine {
         // 获取总数
         let total_count = Self::count(conn, query)?;
         
-        let limit = query.limit.unwrap_or(100);
         let offset = query.offset.unwrap_or(0);
         let has_more = total_count > offset + photos.len() as i64;
 
@@ -53,8 +52,19 @@ impl SearchEngine {
         Ok(count)
     }
 
-    /// T119: 快速搜索（仅通过文件名）
+    /// T119 & T121: 快速搜索（使用全文搜索索引）
     pub fn quick_search(conn: &Connection, keyword: &str, limit: i64) -> Result<Vec<Photo>> {
+        // T121: 优先使用 FTS5 全文搜索（性能更优）
+        let fts_result = Self::fts_search(conn, keyword, limit);
+        
+        // 如果 FTS 搜索失败（可能迁移未执行），回退到 LIKE 搜索
+        if fts_result.is_ok() {
+            return fts_result;
+        }
+        
+        log::warn!("FTS search failed, falling back to LIKE search");
+        
+        // 回退到传统 LIKE 搜索
         let pattern = format!("%{}%", keyword);
         let mut stmt = conn
             .prepare(
@@ -72,6 +82,29 @@ impl SearchEngine {
             .map_err(|e| PhotoManError::database_error(format!("查询失败: {}", e)))?
             .collect::<std::result::Result<Vec<_>, _>>()
             .map_err(|e| PhotoManError::database_error(format!("读取结果失败: {}", e)))?;
+
+        Ok(photos)
+    }
+    
+    /// T121: 使用 FTS5 全文搜索（高性能）
+    fn fts_search(conn: &Connection, keyword: &str, limit: i64) -> Result<Vec<Photo>> {
+        let mut stmt = conn
+            .prepare(
+                "SELECT p.* FROM photos p
+                 INNER JOIN photos_fts fts ON p.id = fts.rowid
+                 WHERE photos_fts MATCH ? AND p.is_deleted = 0
+                 ORDER BY p.first_scanned_at DESC
+                 LIMIT ?",
+            )
+            .map_err(|e| PhotoManError::database_error(format!("FTS 查询准备失败: {}", e)))?;
+
+        let photos = stmt
+            .query_map(rusqlite::params![keyword, limit], |row| {
+                Self::map_row(row)
+            })
+            .map_err(|e| PhotoManError::database_error(format!("FTS 查询失败: {}", e)))?
+            .collect::<std::result::Result<Vec<_>, _>>()
+            .map_err(|e| PhotoManError::database_error(format!("读取 FTS 结果失败: {}", e)))?;
 
         Ok(photos)
     }

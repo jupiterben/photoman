@@ -10,6 +10,7 @@ import {
   HeartOutlined,
   DeleteOutlined,
   SettingOutlined,
+  FolderOpenOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,11 @@ function Sidebar() {
     },
     {
       type: 'divider' as const,
+    },
+    {
+      key: '/watched-directories',
+      icon: <FolderOpenOutlined />,
+      label: t('sidebar.watchedDirectories', '监控目录'),
     },
     {
       key: '/tags',

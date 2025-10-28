@@ -57,10 +57,14 @@ pub async fn scan_folder(
     result.total_files = files.len() as u32;
     
     // 2. 筛选图片文件
+    log::info!("开始筛选图片文件，总文件数: {}", files.len());
+    
     let image_files: Vec<_> = files
         .iter()
         .filter(|f| detector::is_image_file(f))
         .collect();
+    
+    log::info!("筛选完成，发现图片: {}/{}", image_files.len(), files.len());
     
     // 3. 准备重复检测
     let mut dup_detector = dedup::DuplicateDetector::new();

@@ -34,33 +34,53 @@ PhotoMan 项目遵循严格的开发原则，详见 [项目宪章](.specify/memo
 
 ## 技术栈
 
-- 前端框架: [待定]
-- 桌面框架: [待定 - Electron/Tauri]
-- 数据库: [待定]
-- 图片处理: [待定]
+- **桌面框架**: Tauri 2.0
+- **前端**: React 18 + TypeScript 5
+- **状态管理**: Zustand
+- **数据库**: SQLite (rusqlite)
+- **后端语言**: Rust
+- **图片处理**: image crate (Rust)
+- **UI 库**: Ant Design / Custom Components
 
 ## 开发指南
 
 ### 环境要求
 
-[待补充]
+- **Node.js**: 18.x 或更高
+- **Rust**: 1.75+ (通过 rustup 安装)
+- **pnpm**: 8.x 或更高（推荐）
+- **Git**: 2.x
 
 ### 安装依赖
 
 ```bash
-# 待补充
+# 安装前端依赖
+pnpm install
+
+# Rust 依赖会在首次构建时自动安装
 ```
 
 ### 运行开发环境
 
 ```bash
-# 待补充
+# 启动开发服务器（前端 + 后端）
+pnpm run tauri dev
+
+# 或使用调试脚本（启用详细日志）
+./debug-scan.bat  # Windows
 ```
 
 ### 构建
 
 ```bash
-# 待补充
+# 构建生产版本
+pnpm run tauri build
+
+# 仅构建前端
+pnpm run build
+
+# 检查 Rust 代码
+cargo check --manifest-path=src-tauri/Cargo.toml
 ```
 
 ## 项目结构
