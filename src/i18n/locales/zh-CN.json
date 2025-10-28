@@ -26,7 +26,8 @@
     "favoriteOnly": "仅收藏",
     "notFavorite": "未收藏",
     "descending": "降序",
-    "ascending": "升序"
+    "ascending": "升序",
+    "refresh": "刷新"
   },
   "theme": {
     "light": "亮色主题",
@@ -187,6 +188,49 @@
       "save": "保存设置",
       "reset": "重置",
       "saved": "设置已保存"
+    }
+  },
+  "watcher": {
+    "pageTitle": "监控目录管理",
+    "pageDescription": "添加目录以自动监控和同步图片，系统会实时检测文件变化。",
+    "addDirectory": "添加监控目录",
+    "addFirstDirectory": "添加第一个监控目录",
+    "noDirectories": "暂无监控目录",
+    "recursive": "递归监控",
+    "yes": "是",
+    "no": "否",
+    "photoCount": "图片数量",
+    "scanCount": "扫描次数",
+    "lastSynced": "最后同步",
+    "status": {
+      "active": "运行中",
+      "paused": "已暂停",
+      "error": "错误"
+    },
+    "actions": {
+      "pause": "暂停监控",
+      "resume": "恢复监控",
+      "rescan": "重新扫描",
+      "remove": "移除监控"
+    },
+    "dialog": {
+      "title": "添加监控目录",
+      "add": "添加",
+      "directoryPath": "目录路径",
+      "pathRequired": "请选择目录",
+      "pathPlaceholder": "点击右侧按钮选择目录",
+      "browse": "浏览",
+      "selectDirectory": "选择要监控的目录",
+      "selectError": "选择目录失败",
+      "recursive": "递归监控",
+      "recursiveTooltip": "是否监控子目录中的图片",
+      "addSuccess": "添加监控目录成功"
+    },
+    "confirm": {
+      "remove": {
+        "title": "确认移除",
+        "content": "确定要移除此监控目录吗？目录中的图片不会被删除。"
+      }
     }
   }
 }

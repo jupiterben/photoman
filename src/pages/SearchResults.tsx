@@ -4,7 +4,7 @@ import { Empty, Spin, Button } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useSearchStore, useSettingsStore } from '@/stores';
+import { useSearchStore } from '@/stores';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import './SearchResults.css';
 
@@ -12,7 +12,6 @@ function SearchResults() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { searchResult, isSearching, currentQuery } = useSearchStore();
-  const { thumbnailSize } = useSettingsStore();
 
   useEffect(() => {
     // 如果没有搜索结果，返回主页
@@ -73,14 +72,11 @@ function SearchResults() {
         </Button>
         <h1>{t('search.results', '搜索结果')}</h1>
         <div className="search-results-count">
-          {t('search.foundCount', { count: searchResult.total_count }, `找到 ${searchResult.total_count} 张照片`)}
+          {t('search.foundCount', { count: searchResult.total_count })}
         </div>
       </div>
 
-      <PhotoGrid
-        photos={searchResult.photos}
-        thumbnailSize={thumbnailSize}
-      />
+      <PhotoGrid />
 
       {searchResult.has_more && (
         <div className="search-results-more">

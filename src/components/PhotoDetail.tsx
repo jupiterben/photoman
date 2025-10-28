@@ -1,6 +1,6 @@
 // T083: 图片详情模态框
-import { useState, useEffect, useCallback } from 'react';
-import { Modal, Descriptions, Tag, Button, Space, Spin } from 'antd';
+import { useState, useEffect } from 'react';
+import { Modal, Descriptions, Button } from 'antd';
 import {
   LeftOutlined,
   RightOutlined,
@@ -103,8 +103,8 @@ export function PhotoDetail({
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString('zh-CN');
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString('zh-CN');
   };
 
   return (
@@ -172,28 +172,17 @@ export function PhotoDetail({
                 {photo.taken_at ? formatDate(photo.taken_at) : '未知'}
               </Descriptions.Item>
               <Descriptions.Item label="导入时间">
-                {formatDate(photo.imported_at)}
+                {formatDate(photo.created_at)}
               </Descriptions.Item>
               <Descriptions.Item label="文件路径">
                 <div className="file-path">{photo.file_path}</div>
               </Descriptions.Item>
-              {photo.hash && (
+              {photo.file_hash && (
                 <Descriptions.Item label="文件哈希">
-                  <code className="hash-code">{photo.hash.substring(0, 16)}...</code>
+                  <code className="hash-code">{photo.file_hash.substring(0, 16)}...</code>
                 </Descriptions.Item>
               )}
             </Descriptions>
-
-            {photo.tags && photo.tags.length > 0 && (
-              <div className="metadata-tags">
-                <h4>标签</h4>
-                <Space wrap>
-                  {photo.tags.map((tag) => (
-                    <Tag key={tag}>{tag}</Tag>
-                  ))}
-                </Space>
-              </div>
-            )}
 
             <div className="metadata-shortcuts">
               <h4>快捷键</h4>

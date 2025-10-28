@@ -35,7 +35,7 @@ interface AppState {
   setLoading: (loading: boolean, message?: string) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>((set) => ({
   // 初始状态
   viewMode: 'grid',
   sidebarCollapsed: false,

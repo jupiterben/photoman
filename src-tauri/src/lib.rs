@@ -5,4 +5,5 @@ pub mod state;
 pub mod scanner;
 pub mod search;
 pub mod thumbnail;
+pub mod watcher;
 

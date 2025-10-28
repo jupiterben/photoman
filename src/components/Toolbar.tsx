@@ -2,7 +2,7 @@
  * Top toolbar component
  */
 import { useState } from 'react';
-import { Layout, Button, Space, Dropdown } from 'antd';
+import { Layout, Button, Space, Dropdown, message } from 'antd';
 import {
   PlusOutlined,
   BulbOutlined,
@@ -10,9 +10,10 @@ import {
   GlobalOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useImportPhotos } from '@/hooks/useImportPhotos';
 import { SearchBar } from './SearchBar';
 import { AdvancedFilter } from './AdvancedFilter';
+import { AddWatchDirectoryDialog } from './AddWatchDirectoryDialog';
+import { useWatcherStore } from '@/stores/watcherStore';
 import './Toolbar.css';
 
 const { Header } = Layout;
@@ -33,18 +34,27 @@ function Toolbar({
   onImportComplete,
 }: ToolbarProps) {
   const { t, i18n } = useTranslation();
-  const { startImport, isSelecting } = useImportPhotos();
+  const { addDirectory } = useWatcherStore();
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     onLanguageChange?.(lang);
   };
 
-  const handleAddWatchDirectory = async () => {
-    // 添加监控目录，系统将自动监控该目录的文件变化
-    await startImport(onImportComplete);
-    // 首次扫描在后台进行，后续文件变化将实时检测
+  const handleAddWatchDirectory = async (path: string, recursive: boolean) => {
+    setLoading(true);
+    try {
+      await addDirectory(path, recursive);
+      message.success(t('watcher.dialog.addSuccess', '添加监控目录成功'));
+      onImportComplete?.();
+    } catch (error) {
+      console.error('添加监控目录失败:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const languageMenuItems = [
@@ -73,8 +83,8 @@ function Toolbar({
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={handleAddWatchDirectory}
-            loading={isSelecting}
+            onClick={() => setAddDialogOpen(true)}
+            loading={loading}
           >
             {t('toolbar.addWatchDirectory', '添加监控目录')}
           </Button>
@@ -96,6 +106,13 @@ function Toolbar({
       <AdvancedFilter
         open={advancedFilterOpen}
         onClose={() => setAdvancedFilterOpen(false)}
+      />
+
+      {/* 添加监控目录对话框 */}
+      <AddWatchDirectoryDialog
+        visible={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onAdd={handleAddWatchDirectory}
       />
     </Header>
   );

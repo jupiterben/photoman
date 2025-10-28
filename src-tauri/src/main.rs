@@ -8,6 +8,7 @@ mod state;
 mod scanner;
 mod search;
 mod thumbnail;
+mod watcher;
 
 use database::{Database, migrations};
 use state::AppState;
@@ -47,7 +48,27 @@ fn main() {
             log::info!("Database migrations completed");
             
             // Store database in app state
-            app.manage(AppState::new(db));
+            let state = AppState::new(db);
+            
+            // Initialize watcher manager
+            if let Some(watcher_manager) = &state.watcher_manager {
+                let mut manager = watcher_manager.lock().unwrap();
+                manager.set_app_handle(app.app_handle().clone());
+                
+                // Start watcher
+                if let Err(e) = manager.start() {
+                    log::error!("Failed to start watcher manager: {}", e);
+                } else {
+                    log::info!("Watcher manager started");
+                    
+                    // Load watched directories from database
+                    if let Err(e) = manager.load_from_database() {
+                        log::error!("Failed to load watched directories: {}", e);
+                    }
+                }
+            }
+            
+            app.manage(state);
             
             Ok(())
         })
@@ -82,7 +103,16 @@ fn main() {
             commands::get_recycle_bin_photos,
             commands::clean_expired_recycle_bin,
             commands::empty_recycle_bin,
-            commands::get_recycle_bin_stats
+            commands::get_recycle_bin_stats,
+            commands::add_watched_directory,
+            commands::remove_watched_directory,
+            commands::pause_watched_directory,
+            commands::resume_watched_directory,
+            commands::get_watched_directories,
+            commands::get_watched_directory_stats,
+            commands::get_all_watched_directory_stats,
+            commands::rescan_watched_directory,
+            commands::get_watcher_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

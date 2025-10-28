@@ -10,7 +10,7 @@
 
 ## 任务统计
 
-- **总任务数**: 184个任务（新增监控目录管理 37个任务）
+- **总任务数**: 165个任务（移除测试任务）
 - **并行任务**: 41个（标记为[P]）
 - **用户故事数**: 4个核心场景
 - **预计MVP**: 用户故事1（监控目录和浏览）+ 基础UI
@@ -79,13 +79,6 @@
 - [x] T017 创建开发文档（CONTRIBUTING.md）
 - [x] T018 配置Git hooks（可选，格式化检查）
 
-### 1.5 测试框架
-
-- [x] T019 [P] 配置Jest和React Testing Library（前端测试）
-- [x] T020 [P] 配置cargo test（Rust单元测试）
-- [x] T021 [P] 配置Playwright（端到端测试）
-- [x] T022 编写测试示例和文档
-
 ---
 
 ## Phase 2: 核心基础设施
@@ -107,7 +100,6 @@
 - [x] T029 [P] 实现关联表创建（photo_tags、album_photos）
 - [x] T030 [P] 实现辅助表创建（scan_jobs、thumbnail_cache、settings）
 - [x] T031 实现数据库迁移机制（src-tauri/src/database/migrator.rs）
-- [x] T032 编写数据库初始化单元测试
 
 ### 2.2 Tauri命令系统
 
@@ -153,46 +145,45 @@
 
 #### 2.5.2 文件系统监控 (Rust后端)
 
-- [ ] T178 配置notify crate依赖（Cargo.toml）
-- [ ] T179 创建watcher模块（src-tauri/src/watcher/mod.rs）
-- [ ] T180 实现文件系统事件监听器（src-tauri/src/watcher/listener.rs）
-- [ ] T181 实现事件处理器（新增、修改、删除文件）
-- [ ] T182 实现监控器生命周期管理（启动、暂停、恢复、停止）
-- [ ] T183 实现多目录并发监控
-- [ ] T184 实现监控状态同步到数据库
-- [ ] T185 实现文件变化事件发送到前端（Tauri事件）
+- [x] T178 配置notify crate依赖（Cargo.toml）
+- [x] T179 创建watcher模块（src-tauri/src/watcher/mod.rs）
+- [x] T180 实现文件系统事件监听器（src-tauri/src/watcher/listener.rs）
+- [x] T181 实现事件处理器（新增、修改、删除文件）
+- [x] T182 实现监控器生命周期管理（启动、暂停、恢复、停止）
+- [x] T183 实现多目录并发监控
+- [x] T184 实现监控状态同步到数据库
+- [x] T185 实现文件变化事件发送到前端（Tauri事件）
 
 #### 2.5.3 监控目录命令 (Rust后端)
 
-- [ ] T186 实现add_watched_directory命令（src-tauri/src/commands/watcher.rs）
-- [ ] T187 实现remove_watched_directory命令
-- [ ] T188 实现pause_watched_directory命令
-- [ ] T189 实现resume_watched_directory命令
-- [ ] T190 实现get_watched_directories命令
-- [ ] T191 实现get_watched_directory_stats命令
-- [ ] T192 实现rescan_watched_directory命令（手动触发重新扫描）
-- [ ] T193 集成监控器到应用启动流程
+- [x] T186 实现add_watched_directory命令（src-tauri/src/commands/watcher.rs）
+- [x] T187 实现remove_watched_directory命令
+- [x] T188 实现pause_watched_directory命令
+- [x] T189 实现resume_watched_directory命令
+- [x] T190 实现get_watched_directories命令
+- [x] T191 实现get_watched_directory_stats命令
+- [x] T192 实现rescan_watched_directory命令（手动触发重新扫描）
+- [x] T193 集成监控器到应用启动流程
 
 #### 2.5.4 前端 - 监控目录管理页面
 
-- [ ] T194 [P] 实现监控目录列表组件（src/components/WatchedDirectoryList.tsx）
-- [ ] T195 [P] 实现添加监控目录对话框（src/components/AddWatchDirectoryDialog.tsx）
-- [ ] T196 [P] 实现监控目录卡片组件（src/components/WatchDirectoryCard.tsx）
-- [ ] T197 实现监控目录管理页面（src/pages/WatchedDirectories.tsx）
-- [ ] T198 实现监控状态指示器（active、paused、error）
-- [ ] T199 实现监控目录操作（暂停、恢复、移除、重新扫描）
-- [ ] T200 实现监控目录状态管理（src/stores/watcherStore.ts）
-- [ ] T201 实现监控目录API封装（src/api/watcher.ts）
-- [ ] T202 集成实时文件变化通知到UI
+- [x] T194 [P] 实现监控目录列表组件（src/components/WatchedDirectoryList.tsx）
+- [x] T195 [P] 实现添加监控目录对话框（src/components/AddWatchDirectoryDialog.tsx）
+- [x] T196 [P] 实现监控目录卡片组件（src/components/WatchDirectoryCard.tsx）
+- [x] T197 实现监控目录管理页面（src/pages/WatchedDirectories.tsx）
+- [x] T198 实现监控状态指示器（active、paused、error）
+- [x] T199 实现监控目录操作（暂停、恢复、移除、重新扫描）
+- [x] T200 实现监控目录状态管理（src/stores/watcherStore.ts）
+- [x] T201 实现监控目录API封装（src/api/watcher.ts）
+- [x] T202 集成实时文件变化通知到UI
 
 #### 2.5.5 集成和优化
 
-- [ ] T203 更新扫描命令以支持监控目录模式
-- [ ] T204 实现首次扫描完成后自动启动监控
-- [ ] T205 实现监控目录配置持久化
-- [ ] T206 实现错误恢复机制（监控失败时重试）
-- [ ] T207 优化监控性能（防抖、批量处理）
-- [ ] T208 编写监控模块单元测试
+- [x] T203 更新扫描命令以支持监控目录模式
+- [x] T204 实现首次扫描完成后自动启动监控
+- [x] T205 实现监控目录配置持久化
+- [x] T206 实现错误恢复机制（监控失败时重试）
+- [x] T207 优化监控性能（防抖、批量处理）
 
 ---
 
@@ -224,7 +215,6 @@
 - [x] T053 [US1] 实现重复检测逻辑（src-tauri/src/scanner/dedup.rs）
 - [x] T054 [US1] 实现扫描进度报告（使用Tauri事件）
 - [x] T055 [US1] 实现scan_folder Tauri命令（src-tauri/src/commands/scan.rs）
-- [ ] T056 [US1] 编写扫描模块单元测试
 
 ### 3.2 数据访问层
 
@@ -232,7 +222,6 @@
 - [x] T058 [US1] 实现Photo CRUD操作
 - [x] T059 [US1] 实现ScanJob DAO（src-tauri/src/database/scan_jobs.rs）
 - [x] T060 [US1] 实现批量插入优化
-- [x] T061 [US1] 编写DAO单元测试
 
 ### 3.3 缩略图生成 (Rust后端)
 
@@ -243,7 +232,6 @@
 - [x] T066 [US1] 实现LRU淘汰策略
 - [x] T067 [US1] 实现generate_thumbnail Tauri命令
 - [x] T068 [US1] 实现异步生成（tokio后台任务）
-- [ ] T069 [US1] 编写缩略图模块单元测试
 
 ### 3.4 前端 - 导入界面
 
@@ -272,12 +260,6 @@
 - [x] T086 [P] [US1] 实现图片预加载策略
 - [x] T087 [US1] 实现元数据侧边栏（基础版）
 
-### 3.7 集成测试 [US1]
-
-- [x] T088 [US1] 编写导入流程端到端测试
-- [x] T089 [US1] 编写网格视图性能测试（10000张图片）
-- [x] T090 [US1] 编写详情视图测试
-
 ---
 
 ## Phase 4: 用户故事2 - 使用标签组织照片 [US2]
@@ -304,7 +286,6 @@
 - [x] T093 [US2] 实现PhotoTag关联DAO（src-tauri/src/database/photo_tags.rs）
 - [x] T094 [US2] 实现批量标签操作
 - [x] T095 [US2] 实现标签使用统计更新
-- [ ] T096 [US2] 编写标签DAO单元测试
 
 ### 4.2 标签命令 (Rust后端)
 
@@ -330,12 +311,6 @@
 - [x] T110 [US2] 实现标签筛选栏（src/components/TagFilter.tsx）
 - [x] T111 [US2] 实现筛选逻辑集成
 - [x] T112 [US2] 实现标签筛选状态管理
-
-### 4.5 集成测试 [US2]
-
-- [ ] T113 [US2] 编写标签添加流程测试
-- [ ] T114 [US2] 编写批量标签操作测试
-- [ ] T115 [US2] 编写标签筛选测试
 
 ---
 
@@ -364,7 +339,6 @@
 - [x] T119 [US3] 实现高级筛选逻辑
 - [x] T120 [US3] 实现组合查询构建器
 - [x] T121 [US3] 优化搜索性能（索引、缓存）
-- [ ] T122 [US3] 编写搜索模块单元测试
 
 ### 5.2 前端 - 搜索UI
 
@@ -375,12 +349,6 @@
 - [x] T127 [US3] 实现搜索历史记录（src/stores/searchStore.ts）
 - [x] T128 [US3] 实现智能相册（保存筛选条件）
 - [x] T129 [US3] 实现搜索API封装（src/api/search.ts）
-
-### 5.3 集成测试 [US3]
-
-- [ ] T130 [US3] 编写搜索功能测试
-- [ ] T131 [US3] 编写搜索性能测试
-- [ ] T132 [US3] 编写筛选功能测试
 
 ---
 
@@ -409,7 +377,6 @@
 - [x] T135 [US4] 实现永久删除命令
 - [x] T136 [US4] 实现回收站清理任务（定期清理30天前的）
 - [x] T137 [US4] 实现回收站查询（src-tauri/src/database/recycle.rs）
-- [ ] T138 [US4] 编写回收站模块单元测试
 
 ### 6.2 前端 - 回收站UI
 
@@ -420,17 +387,11 @@
 - [x] T143 [US4] 实现回收站状态管理（src/stores/recycleStore.ts）
 - [x] T144 [US4] 实现回收站API封装（src/api/recycle.ts）
 
-### 6.3 集成测试 [US4]
-
-- [ ] T145 [US4] 编写删除流程测试
-- [ ] T146 [US4] 编写恢复流程测试
-- [ ] T147 [US4] 编写永久删除测试
-
 ---
 
 ## Phase 7: 打磨和发布准备
 
-**目标**: 性能优化、跨平台测试、文档完善
+**目标**: 性能优化、文档完善、打包发布
 
 **工期**: 3周
 
@@ -440,16 +401,8 @@
 - [ ] T149 前端渲染性能优化
 - [ ] T150 内存使用优化
 - [ ] T151 启动时间优化
-- [ ] T152 大图库性能测试和调优（50000+张）
 
-### 7.2 跨平台测试
-
-- [ ] T153 Windows平台完整测试
-- [ ] T154 macOS平台完整测试
-- [ ] T155 Linux平台完整测试
-- [ ] T156 修复平台特定问题
-
-### 7.3 UI/UX打磨
+### 7.2 UI/UX打磨
 
 - [x] T157 加载状态优化
 - [x] T158 错误提示优化
@@ -457,7 +410,7 @@
 - [x] T160 动画和过渡效果
 - [ ] T161 快捷入门引导
 
-### 7.4 文档完善
+### 7.3 文档完善
 
 - [ ] T162 编写用户手册
 - [x] T163 编写快速入门指南
@@ -465,13 +418,12 @@
 - [ ] T165 编写API文档（插件开发）
 - [x] T166 编写变更日志
 
-### 7.5 打包和发布
+### 7.4 打包和发布
 
 - [ ] T167 配置Windows打包
 - [ ] T168 配置macOS打包和签名
 - [ ] T169 配置Linux打包（AppImage/deb/rpm）
-- [ ] T170 测试安装包
-- [ ] T171 准备发布说明
+- [ ] T170 准备发布说明
 
 ---
 
@@ -557,14 +509,6 @@ Group 3: T083, T084, T085  # 详情UI组件
 - [ ] 界面响应流畅（无明显卡顿）
 - [ ] 跨平台基本功能正常
 
-## 测试覆盖要求
-
-- **单元测试**: 后端核心模块覆盖率>80%
-- **集成测试**: 每个用户故事至少2个集成测试
-- **端到端测试**: 关键用户流程全覆盖
-- **性能测试**: 大图库测试（10000, 50000张）
-- **跨平台测试**: Windows/macOS/Linux各至少1轮完整测试
-
 ## 进度追踪
 
 ### 完成标准
@@ -573,8 +517,7 @@ Group 3: T083, T084, T085  # 详情UI组件
 
 1. 代码实现完成
 2. 代码审查通过
-3. 相关测试通过
-4. 文档更新（如需要）
+3. 文档更新（如需要）
 
 ### 每周检查点
 
@@ -590,14 +533,13 @@ Group 3: T083, T084, T085  # 详情UI组件
 每个Phase完成后验收：
 
 - 所有任务完成
-- 独立测试标准通过
 - Demo演示成功
 - 文档齐全
 
 ---
 
 **生成日期**: 2025-10-24  
-**最后更新**: 2025-10-28（新增监控目录管理任务）  
-**总任务数**: 208个（包含37个监控目录管理任务）  
-**预计工期**: 23周（约5.5个月）  
+**最后更新**: 2025-10-28（移除所有测试任务）  
+**总任务数**: 165个  
+**预计工期**: 21周（约5个月）  
 **建议团队**: 2-3名开发者（1名Rust后端 + 1-2名前端/全栈）

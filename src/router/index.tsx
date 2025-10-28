@@ -11,7 +11,7 @@ import RecycleBin from '@/pages/RecycleBin';
 
 // Placeholder components for routes that will be implemented later
 const Favorites = () => <div>收藏页面 - 待实现</div>;
-const WatchedDirectories = () => <div>监控目录管理 - 待实现</div>;
+import { WatchedDirectories } from '@/pages/WatchedDirectories';
 const Tags = () => <div>标签页面 - 待实现</div>;
 const Albums = () => <div>相册页面 - 待实现</div>;
 

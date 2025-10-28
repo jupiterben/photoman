@@ -18,7 +18,8 @@
     "back": "Back",
     "actions": "Actions",
     "none": "None",
-    "totalItems": "Total {{total}} items"
+    "totalItems": "Total {{total}} items",
+    "refresh": "Refresh"
   },
   "theme": {
     "light": "Light Theme",
@@ -141,6 +142,49 @@
       "save": "Save Settings",
       "reset": "Reset",
       "saved": "Settings Saved"
+    }
+  },
+  "watcher": {
+    "pageTitle": "Watch Directory Management",
+    "pageDescription": "Add directories to automatically monitor and sync photos, system will detect file changes in real-time.",
+    "addDirectory": "Add Watch Directory",
+    "addFirstDirectory": "Add First Watch Directory",
+    "noDirectories": "No watched directories",
+    "recursive": "Recursive Monitoring",
+    "yes": "Yes",
+    "no": "No",
+    "photoCount": "Photo Count",
+    "scanCount": "Scan Count",
+    "lastSynced": "Last Synced",
+    "status": {
+      "active": "Running",
+      "paused": "Paused",
+      "error": "Error"
+    },
+    "actions": {
+      "pause": "Pause Monitoring",
+      "resume": "Resume Monitoring",
+      "rescan": "Rescan",
+      "remove": "Remove Monitoring"
+    },
+    "dialog": {
+      "title": "Add Watch Directory",
+      "add": "Add",
+      "directoryPath": "Directory Path",
+      "pathRequired": "Please select a directory",
+      "pathPlaceholder": "Click button on the right to select directory",
+      "browse": "Browse",
+      "selectDirectory": "Select directory to watch",
+      "selectError": "Failed to select directory",
+      "recursive": "Recursive Monitoring",
+      "recursiveTooltip": "Whether to monitor photos in subdirectories",
+      "addSuccess": "Watch directory added successfully"
+    },
+    "confirm": {
+      "remove": {
+        "title": "Confirm Remove",
+        "content": "Are you sure to remove this watch directory? Photos in the directory will not be deleted."
+      }
     }
   }
 }

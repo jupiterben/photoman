@@ -4,7 +4,6 @@
 pub mod listener;
 pub mod manager;
 
-pub use listener::{FileSystemEvent, WatcherListener};
 pub use manager::{WatcherManager, WatcherStatus};
 
 // Re-export for convenience

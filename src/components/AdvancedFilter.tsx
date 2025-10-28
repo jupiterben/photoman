@@ -81,7 +81,7 @@ export function AdvancedFilter({ open, onClose }: AdvancedFilterProps) {
       navigate('/search-results');
       
       message.success(
-        t('search.foundResults', { count: result.total_count }, `找到 ${result.total_count} 张照片`)
+        t('search.foundResults', { count: result.total_count })
       );
       
       onClose();

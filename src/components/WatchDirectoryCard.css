@@ -1,0 +1,54 @@
+/* Watch directory card styles */
+
+.watch-directory-card {
+  margin-bottom: 16px;
+}
+
+.watch-directory-card .directory-path {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.watch-directory-card .card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.watch-directory-card .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.watch-directory-card .info-row:last-child {
+  border-bottom: none;
+}
+
+.watch-directory-card .info-row .label {
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.watch-directory-card .info-row .value {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.watch-directory-card .error-message {
+  color: #ff4d4f;
+  font-size: 12px;
+  padding: 8px;
+  background: #fff2f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+

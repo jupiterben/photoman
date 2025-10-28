@@ -1,7 +1,6 @@
 // T104: 标签选择器组件
 import { useState, useEffect } from 'react';
-import { Modal, Space, Button, Spin, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Modal, Space, Spin, message } from 'antd';
 import { getAllTags } from '@/api/tags';
 import { TagChip } from './TagChip';
 import type { Tag } from '@/api/tags';
@@ -60,10 +59,6 @@ export function TagSelector({
     } else {
       setSelected([tag]);
     }
-  };
-
-  const isSelected = (tag: Tag) => {
-    return selected.some((t) => t.id === tag.id);
   };
 
   const handleOk = () => {

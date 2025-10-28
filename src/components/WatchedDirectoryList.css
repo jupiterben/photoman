@@ -1,0 +1,25 @@
+/* Watched directory list styles */
+
+.watched-directory-list {
+  padding: 16px;
+}
+
+.watched-directory-list .list-header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.watched-directory-list .directory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .watched-directory-list .directory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -1,0 +1,13 @@
+/* Watched directories page styles */
+
+.watched-directories-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.watched-directories-page .page-description {
+  color: #8c8c8c;
+  margin-bottom: 24px;
+}
+

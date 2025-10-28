@@ -196,6 +196,16 @@ impl AppError {
     pub fn tauri_error(message: impl Into<String>) -> Self {
         Self::new(ErrorCode::InternalError, message)
     }
+    
+    /// Create a validation error
+    pub fn validation_error(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::ValidationError, message)
+    }
+    
+    /// Create a not found error
+    pub fn not_found_error(message: impl Into<String>) -> Self {
+        Self::new(ErrorCode::FileNotFound, message)
+    }
 }
 
 #[cfg(test)]

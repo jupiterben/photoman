@@ -3,7 +3,7 @@
 
 use crate::database::models::WatchedDirectory;
 use crate::error::{PhotoManError, Result};
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OptionalExtension};
 
 /// 创建新的监控目录
 /// T175: Create operation

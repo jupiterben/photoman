@@ -1,7 +1,8 @@
 // T077: 照片卡片组件
 import { useState } from 'react';
 import { Card, Skeleton, Checkbox } from 'antd';
-import { FileImageOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { FileImageOutlined, StarFilled } from '@ant-design/icons';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import type { Photo } from '@/api/photos';
 import './PhotoCard.css';
@@ -42,7 +43,7 @@ export function PhotoCard({ photo, selected, size = 'medium', onSelect, onClick 
     onClick?.(photo);
   };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (e: CheckboxChangeEvent) => {
     e.stopPropagation();
     onSelect?.(photo.id, e.target.checked);
   };

@@ -1,6 +1,6 @@
 // T102-T103: 标签输入组件（带自动补全）
 import { useState, useEffect, useCallback } from 'react';
-import { AutoComplete, Input, Tag, Space, Button, message } from 'antd';
+import { AutoComplete, Input, Tag, Space, message } from 'antd';
 import { PlusOutlined, CloseOutlined } from '@ant-design/icons';
 import { searchTags, getMostUsedTags, createTag } from '@/api/tags';
 import type { Tag as TagType } from '@/api/tags';
@@ -157,7 +157,6 @@ export function TagInput({ value = [], onChange, placeholder, maxTags }: TagInpu
           prefix={<PlusOutlined />}
           onKeyPress={handleKeyPress}
           disabled={maxTags ? value.length >= maxTags : false}
-          loading={loading}
         />
       </AutoComplete>
     </div>

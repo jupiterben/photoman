@@ -1,5 +1,4 @@
 // T159: 空状态设计组件
-import { useTranslation } from 'react-i18next';
 import './EmptyState.css';
 
 export interface EmptyStateProps {
@@ -53,8 +52,6 @@ export default function EmptyState({
   action,
   variant = 'default',
 }: EmptyStateProps) {
-  const { t } = useTranslation();
-  
   const content = defaultContent[variant];
   const displayIcon = icon ?? content.icon;
   const displayTitle = title ?? content.title;
