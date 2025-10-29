@@ -13,7 +13,7 @@ import {
   getAllWatchedDirectoryStats,
   rescanWatchedDirectory,
 } from '@/api/watcher';
-import { listen } from '@tauri-apps/api/event';
+import { listen } from '@/api/tauri-adapter';
 
 interface WatcherState {
   // 数据状态
@@ -196,8 +196,8 @@ export const useWatcherStore = create<WatcherState>((set, get) => ({
     try {
       unlistenFileSystem = await listen<{ type: string; path: string }>(
         'file-system-event',
-        (event) => {
-          console.log('文件系统事件:', event.payload);
+        (payload) => {
+          console.log('文件系统事件:', payload);
           
           // 文件变化时重新加载统计
           const { loadStats } = get();

@@ -1,7 +1,7 @@
 // Watched directory API
 // T197: 实现监控目录 API 层
 
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from './tauri-adapter';
 
 /**
  * 监控目录实体

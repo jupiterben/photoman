@@ -3,7 +3,7 @@
  */
 import { useState } from 'react';
 import { message } from 'antd';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from '@/api/tauri-adapter';
 import { useTranslation } from 'react-i18next';
 import { scanFolder, listenScanProgress } from '@/api/scanner';
 import { useScanStore } from '@/stores';

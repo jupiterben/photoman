@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Modal, Form, Input, Switch, Button, message } from 'antd';
 import { FolderOpenOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from '@/api/tauri-adapter';
 
 interface AddWatchDirectoryDialogProps {
   visible: boolean;

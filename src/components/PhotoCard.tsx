@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, Skeleton, Checkbox } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { FileImageOutlined, StarFilled } from '@ant-design/icons';
-import { convertFileSrc } from '@tauri-apps/api/core';
+import { convertFileSrc } from '@/api/tauri-adapter';
 import type { Photo } from '@/api/photos';
 import './PhotoCard.css';
 

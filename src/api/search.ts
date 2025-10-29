@@ -1,5 +1,5 @@
 // T129: 搜索API封装
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from './tauri-adapter';
 
 /**
  * 搜索查询参数

@@ -1,5 +1,5 @@
 // T082: 图片列表API
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from './tauri-adapter';
 
 export interface Photo {
   id: number;

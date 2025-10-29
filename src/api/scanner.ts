@@ -1,6 +1,5 @@
 // T073: 扫描API调用
-import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
+import { invoke, listen } from './tauri-adapter';
 
 export interface ScanOptions {
   recursive: boolean;
@@ -44,8 +43,6 @@ export async function scanFolder(
 /**
  * 监听扫描进度
  */
-export function listenScanProgress(callback: (progress: ScanProgress) => void) {
-  return listen<ScanProgress>('scan_progress', (event) => {
-    callback(event.payload);
-  });
+export async function listenScanProgress(callback: (progress: ScanProgress) => void) {
+  return await listen<ScanProgress>('scan_progress', callback);
 }

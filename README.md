@@ -34,53 +34,63 @@ PhotoMan 项目遵循严格的开发原则，详见 [项目宪章](.specify/memo
 
 ## 技术栈
 
-- **桌面框架**: Tauri 2.0
+- **桌面框架**: Electron 28+
 - **前端**: React 18 + TypeScript 5
 - **状态管理**: Zustand
-- **数据库**: SQLite (rusqlite)
-- **后端语言**: Rust
-- **图片处理**: image crate (Rust)
+- **数据库**: SQLite (better-sqlite3)
+- **后端**: Node.js + TypeScript
+- **图片处理**: Sharp (Node.js)
 - **UI 库**: Ant Design / Custom Components
 
 ## 开发指南
 
 ### 环境要求
 
-- **Node.js**: 18.x 或更高
-- **Rust**: 1.75+ (通过 rustup 安装)
+- **Node.js**: 18.x 或更高（推荐 20.x LTS）
 - **pnpm**: 8.x 或更高（推荐）
 - **Git**: 2.x
+- **构建工具** (Windows): Visual Studio Build Tools 或 windows-build-tools
 
 ### 安装依赖
 
 ```bash
-# 安装前端依赖
+# 安装所有依赖（前端 + Electron）
 pnpm install
 
-# Rust 依赖会在首次构建时自动安装
+# 编译 native 模块（better-sqlite3, sharp）
+pnpm rebuild
 ```
+
+> 详细的 pnpm 配置和使用说明，请参考 [PNPM_SETUP.md](./PNPM_SETUP.md)
 
 ### 运行开发环境
 
 ```bash
-# 启动开发服务器（前端 + 后端）
-pnpm run tauri dev
+# 启动 Electron 应用（前端 + 后端）
+pnpm dev:electron
 
-# 或使用调试脚本（启用详细日志）
-./debug-scan.bat  # Windows
+# 或分别启动（用于调试）
+pnpm dev:vite          # 启动前端开发服务器
+pnpm dev:electron-start # 启动 Electron 窗口
 ```
 
 ### 构建
 
 ```bash
-# 构建生产版本
-pnpm run tauri build
+# 构建全部（前端 + Electron 后端）
+pnpm build:all
+
+# 打包为安装程序
+pnpm dist           # 当前平台
+pnpm dist:win       # Windows (NSIS)
+pnpm dist:mac       # macOS (DMG)
+pnpm dist:linux     # Linux (AppImage + deb)
 
 # 仅构建前端
-pnpm run build
+pnpm build
 
-# 检查 Rust 代码
-cargo check --manifest-path=src-tauri/Cargo.toml
+# 仅构建 Electron 后端
+pnpm build:electron
 ```
 
 ## 项目结构

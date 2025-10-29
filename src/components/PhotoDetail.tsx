@@ -8,7 +8,7 @@ import {
   StarFilled,
   CloseOutlined,
 } from '@ant-design/icons';
-import { convertFileSrc } from '@tauri-apps/api/core';
+import { convertFileSrc } from '@/api/tauri-adapter';
 import { ImageViewer } from './ImageViewer';
 import type { Photo } from '@/api/photos';
 import './PhotoDetail.css';

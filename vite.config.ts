@@ -7,13 +7,14 @@ export default defineConfig({
   plugins: [react()],
   clearScreen: false,
   server: {
-    host: '127.0.0.1', // Use IPv4 instead of IPv6 to avoid permission issues
-    port: 11420,
+    host: '127.0.0.1',
+    port: 5173,
     strictPort: true,
     watch: {
-      ignored: ['**/src-tauri/**'],
+      ignored: ['**/electron/**', '**/dist-electron/**'],
     },
   },
+  base: './', // 重要：Electron需要相对路径
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

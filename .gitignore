@@ -7,17 +7,10 @@ pnpm-debug.log*
 
 # Build outputs
 dist/
+dist-electron/
+dist-output/
 build/
 out/
-
-# Rust
-target/
-debug/
-release/
-*.rs.bk
-*.rlib
-*.prof*
-Cargo.lock
 
 # Environment variables
 .env
@@ -41,10 +34,6 @@ logs/
 coverage/
 .nyc_output/
 
-# Tauri specific
-src-tauri/target/
-src-tauri/gen/
-
 # OS
 .DS_Store
 Thumbs.db
@@ -64,4 +53,7 @@ desktop.ini
 *.bak
 *.backup
 
+# pnpm store (local cache)
+.pnpm-store/
+.pnpm-debug.log
 /pnpm-lock.yaml

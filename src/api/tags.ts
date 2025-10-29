@@ -1,5 +1,5 @@
 // T109: 标签API封装
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from './tauri-adapter';
 
 export interface Tag {
   id?: number;
