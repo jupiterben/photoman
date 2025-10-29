@@ -4,13 +4,13 @@
 mod commands;
 mod database;
 mod error;
-mod state;
 mod scanner;
 mod search;
+mod state;
 mod thumbnail;
 mod watcher;
 
-use database::{Database, migrations};
+use database::{migrations, Database};
 use state::AppState;
 use tauri::Manager;
 
@@ -23,53 +23,53 @@ fn main() {
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             // Get app data directory
-            let app_dir = app.path().app_data_dir()
+            let app_dir = app
+                .path()
+                .app_data_dir()
                 .expect("Failed to get app data directory");
-            
+
             log::info!("App data directory: {:?}", app_dir);
-            
+
             // Create database path
             let mut db_path = app_dir.clone();
             db_path.push("photoman.db");
-            
+
             // Initialize database
-            let db = Database::new(db_path.clone())
-                .expect("Failed to initialize database");
-            
+            let db = Database::new(db_path.clone()).expect("Failed to initialize database");
+
             log::info!("Database initialized at: {:?}", db_path);
-            
+
             // Run migrations
             let conn = db.get_connection();
             let conn = conn.lock().unwrap();
-            migrations::run_migrations(&conn)
-                .expect("Failed to run database migrations");
+            migrations::run_migrations(&conn).expect("Failed to run database migrations");
             drop(conn);
-            
+
             log::info!("Database migrations completed");
-            
+
             // Store database in app state
             let state = AppState::new(db);
-            
+
             // Initialize watcher manager
             if let Some(watcher_manager) = &state.watcher_manager {
                 let mut manager = watcher_manager.lock().unwrap();
                 manager.set_app_handle(app.app_handle().clone());
-                
+
                 // Start watcher
                 if let Err(e) = manager.start() {
                     log::error!("Failed to start watcher manager: {}", e);
                 } else {
                     log::info!("Watcher manager started");
-                    
+
                     // Load watched directories from database
                     if let Err(e) = manager.load_from_database() {
                         log::error!("Failed to load watched directories: {}", e);
                     }
                 }
             }
-            
+
             app.manage(state);
-            
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -112,9 +112,13 @@ fn main() {
             commands::get_watched_directory_stats,
             commands::get_all_watched_directory_stats,
             commands::rescan_watched_directory,
-            commands::get_watcher_status
+            commands::get_watcher_status,
+            commands::get_photos,
+            commands::get_photo_by_id,
+            commands::update_photo,
+            commands::delete_photo,
+            commands::get_photos_count
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-

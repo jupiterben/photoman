@@ -5,6 +5,7 @@ pub mod walker;
 pub mod detector;
 pub mod hasher;
 pub mod dedup;
+pub mod service;
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;

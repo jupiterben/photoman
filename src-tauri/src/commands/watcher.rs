@@ -7,12 +7,14 @@ use crate::error::{AppError, Result};
 use crate::state::AppState;
 use crate::watcher::WatcherStatus;
 use std::path::PathBuf;
-use tauri::State;
+use std::sync::Arc;
+use tauri::{Emitter, State};
 
 /// 添加监控目录命令
 /// T186: add_watched_directory
 #[tauri::command]
 pub async fn add_watched_directory(
+    app: tauri::AppHandle,
     directory_path: String,
     recursive: bool,
     state: State<'_, AppState>,
@@ -37,9 +39,9 @@ pub async fn add_watched_directory(
 
     // 创建监控目录记录
     let mut watched_dir = WatchedDirectory::new(directory_path.clone(), recursive);
-    
+
     let conn = state.db.lock().unwrap();
-    
+
     // 检查是否已存在
     if let Some(existing) = watched_directories::find_by_path(&conn, &directory_path)? {
         return Err(AppError::validation_error(format!(
@@ -55,7 +57,7 @@ pub async fn add_watched_directory(
     // 添加到监控管理器
     if let Some(manager) = &state.watcher_manager {
         let manager = manager.lock().unwrap();
-        if let Err(e) = manager.add_watch(id, path, recursive) {
+        if let Err(e) = manager.add_watch(id, path.clone(), recursive) {
             log::error!("添加监控失败: {}", e);
             // 更新状态为错误
             let _ = watched_directories::update_status(&conn, id, "error", Some(e.to_string()));
@@ -68,18 +70,55 @@ pub async fn add_watched_directory(
 
     // 标记已同步
     watched_directories::mark_synced(&conn, id)?;
+    drop(conn);
 
-    log::info!("成功添加监控目录 ID: {}", id);
+    log::info!("成功添加监控目录 ID: {}, 开始初始扫描", id);
+
+    // 在后台线程执行初始扫描
+    let scan_service = Arc::clone(&state.scan_service);
+    let scan_path = path.clone();
+    let scan_recursive = recursive;
+    let app_handle = app.clone();
+
+    std::thread::spawn(move || {
+        log::info!("开始初始扫描: {:?}", scan_path);
+        match scan_service.scan_directory(&scan_path, scan_recursive, Some(&app_handle)) {
+            Ok(stats) => {
+                log::info!("初始扫描完成: {:?}, 统计: {:?}", scan_path, stats);
+
+                // 发送完成事件到前端
+                let result = serde_json::json!({
+                    "directory_id": id,
+                    "directory_path": scan_path.to_string_lossy(),
+                    "stats": stats,
+                });
+                if let Err(e) = app_handle.emit("initial_scan_complete", result) {
+                    log::error!("发送扫描完成事件失败: {}", e);
+                }
+            }
+            Err(e) => {
+                log::error!("初始扫描失败: {:?}: {}", scan_path, e);
+
+                // 发送错误事件到前端
+                let error = serde_json::json!({
+                    "directory_id": id,
+                    "directory_path": scan_path.to_string_lossy(),
+                    "error": e.to_string(),
+                });
+                if let Err(e) = app_handle.emit("initial_scan_error", error) {
+                    log::error!("发送扫描错误事件失败: {}", e);
+                }
+            }
+        }
+    });
+
     Ok(id)
 }
 
 /// 移除监控目录命令
 /// T187: remove_watched_directory
 #[tauri::command]
-pub async fn remove_watched_directory(
-    directory_id: i64,
-    state: State<'_, AppState>,
-) -> Result<()> {
+pub async fn remove_watched_directory(directory_id: i64, state: State<'_, AppState>) -> Result<()> {
     log::info!("移除监控目录 ID: {}", directory_id);
 
     let conn = state.db.lock().unwrap();
@@ -106,10 +145,7 @@ pub async fn remove_watched_directory(
 /// 暂停监控目录命令
 /// T188: pause_watched_directory
 #[tauri::command]
-pub async fn pause_watched_directory(
-    directory_id: i64,
-    state: State<'_, AppState>,
-) -> Result<()> {
+pub async fn pause_watched_directory(directory_id: i64, state: State<'_, AppState>) -> Result<()> {
     log::info!("暂停监控目录 ID: {}", directory_id);
 
     let conn = state.db.lock().unwrap();
@@ -139,10 +175,7 @@ pub async fn pause_watched_directory(
 /// 恢复监控目录命令
 /// T189: resume_watched_directory
 #[tauri::command]
-pub async fn resume_watched_directory(
-    directory_id: i64,
-    state: State<'_, AppState>,
-) -> Result<()> {
+pub async fn resume_watched_directory(directory_id: i64, state: State<'_, AppState>) -> Result<()> {
     log::info!("恢复监控目录 ID: {}", directory_id);
 
     let conn = state.db.lock().unwrap();
@@ -172,9 +205,7 @@ pub async fn resume_watched_directory(
 /// 获取所有监控目录命令
 /// T190: get_watched_directories
 #[tauri::command]
-pub async fn get_watched_directories(
-    state: State<'_, AppState>,
-) -> Result<Vec<WatchedDirectory>> {
+pub async fn get_watched_directories(state: State<'_, AppState>) -> Result<Vec<WatchedDirectory>> {
     log::debug!("获取所有监控目录");
 
     let conn = state.db.lock().unwrap();
@@ -218,6 +249,7 @@ pub async fn get_all_watched_directory_stats(
 /// T192: rescan_watched_directory
 #[tauri::command]
 pub async fn rescan_watched_directory(
+    app: tauri::AppHandle,
     directory_id: i64,
     state: State<'_, AppState>,
 ) -> Result<()> {
@@ -229,9 +261,47 @@ pub async fn rescan_watched_directory(
     let dir = watched_directories::find_by_id(&conn, directory_id)?
         .ok_or_else(|| AppError::not_found_error(format!("监控目录不存在: {}", directory_id)))?;
 
-    // TODO: T203 - 触发重新扫描
-    // 这里将在 T203 中集成到扫描命令
-    log::info!("触发重新扫描: {:?}", dir.directory_path);
+    let path = PathBuf::from(&dir.directory_path);
+    let recursive = dir.recursive;
+    drop(conn);
+
+    log::info!("触发重新扫描: {:?}", path);
+
+    // 在后台线程执行扫描
+    let scan_service = Arc::clone(&state.scan_service);
+    let app_handle = app.clone();
+
+    std::thread::spawn(move || {
+        log::info!("开始重新扫描: {:?}", path);
+        match scan_service.scan_directory(&path, recursive, Some(&app_handle)) {
+            Ok(stats) => {
+                log::info!("重新扫描完成: {:?}, 统计: {:?}", path, stats);
+
+                // 发送完成事件到前端
+                let result = serde_json::json!({
+                    "directory_id": directory_id,
+                    "directory_path": path.to_string_lossy(),
+                    "stats": stats,
+                });
+                if let Err(e) = app_handle.emit("rescan_complete", result) {
+                    log::error!("发送扫描完成事件失败: {}", e);
+                }
+            }
+            Err(e) => {
+                log::error!("重新扫描失败: {:?}: {}", path, e);
+
+                // 发送错误事件到前端
+                let error = serde_json::json!({
+                    "directory_id": directory_id,
+                    "directory_path": path.to_string_lossy(),
+                    "error": e.to_string(),
+                });
+                if let Err(e) = app_handle.emit("rescan_error", error) {
+                    log::error!("发送扫描错误事件失败: {}", e);
+                }
+            }
+        }
+    });
 
     Ok(())
 }
@@ -255,4 +325,3 @@ pub async fn get_watcher_status(
         Ok(Vec::new())
     }
 }
-

@@ -3,9 +3,10 @@
 
 use super::listener::{FileSystemEvent, WatcherListener};
 use crate::database::watched_directories;
+use crate::scanner::service::ScanService;
 use rusqlite::Connection;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -43,18 +44,20 @@ pub struct WatcherManager {
     app_handle: Option<AppHandle>,
     is_running: Arc<Mutex<bool>>,
     db_path: PathBuf,
+    scan_service: Arc<ScanService>,
 }
 
 impl WatcherManager {
     /// 创建新的监控管理器
     /// T182: 生命周期管理 - 初始化
-    pub fn new(db_path: PathBuf) -> Self {
+    pub fn new(db_path: PathBuf, scan_service: Arc<ScanService>) -> Self {
         Self {
             watched_dirs: Arc::new(Mutex::new(HashMap::new())),
             listener: Arc::new(Mutex::new(None)),
             app_handle: None,
             is_running: Arc::new(Mutex::new(false)),
             db_path,
+            scan_service,
         }
     }
 
@@ -176,7 +179,7 @@ impl WatcherManager {
         let watched_dirs = Arc::clone(&self.watched_dirs);
         let is_running = Arc::clone(&self.is_running);
         let app_handle = self.app_handle.clone();
-        let db_path = self.db_path.clone();
+        let scan_service = Arc::clone(&self.scan_service);
 
         thread::spawn(move || {
             log::info!("事件处理循环已启动");
@@ -212,7 +215,7 @@ impl WatcherManager {
                     }
 
                     // 处理事件
-                    Self::process_file_system_event(&event, &db_path);
+                    Self::process_file_system_event(&event, &scan_service);
 
                     // T185: 发送事件到前端
                     if let Some(handle) = &app_handle {
@@ -229,25 +232,32 @@ impl WatcherManager {
     }
 
     /// 处理文件系统事件
-    /// T181: 事件处理逻辑
-    fn process_file_system_event(event: &FileSystemEvent, _db_path: &Path) {
+    /// T181: 事件处理逻辑 - 已集成扫描服务
+    fn process_file_system_event(event: &FileSystemEvent, scan_service: &Arc<ScanService>) {
         match event {
             FileSystemEvent::Created(path) => {
                 log::info!("检测到新文件: {:?}", path);
-                // TODO: 扫描新文件并添加到数据库
-                // 这将在 T203 中集成到扫描命令
+                if let Err(e) = scan_service.scan_single_file(path) {
+                    log::error!("扫描新文件失败: {}", e);
+                }
             }
             FileSystemEvent::Modified(path) => {
                 log::info!("检测到文件修改: {:?}", path);
-                // TODO: 更新文件信息
+                if let Err(e) = scan_service.handle_file_modified(path) {
+                    log::error!("处理文件修改失败: {}", e);
+                }
             }
             FileSystemEvent::Deleted(path) => {
                 log::info!("检测到文件删除: {:?}", path);
-                // TODO: 标记文件为已删除或从数据库移除
+                if let Err(e) = scan_service.handle_file_deleted(path) {
+                    log::error!("处理文件删除失败: {}", e);
+                }
             }
             FileSystemEvent::Renamed { from, to } => {
                 log::info!("检测到文件重命名: {:?} -> {:?}", from, to);
-                // TODO: 更新文件路径
+                if let Err(e) = scan_service.handle_file_renamed(from, to) {
+                    log::error!("处理文件重命名失败: {}", e);
+                }
             }
         }
     }
@@ -308,19 +318,18 @@ impl WatcherManager {
                 let path = PathBuf::from(&dir.directory_path);
                 if let Err(e) = self.add_watch(id, path, dir.recursive) {
                     log::error!("恢复监控目录失败 (ID: {}): {}", id, e);
-                    
+
                     // 更新为错误状态
-                    let _ = watched_directories::update_status(
-                        &conn,
-                        id,
-                        "error",
-                        Some(e.to_string()),
-                    );
+                    let _ =
+                        watched_directories::update_status(&conn, id, "error", Some(e.to_string()));
                 }
             }
         }
 
-        log::info!("从数据库加载了 {} 个监控目录", self.watched_dirs.lock().unwrap().len());
+        log::info!(
+            "从数据库加载了 {} 个监控目录",
+            self.watched_dirs.lock().unwrap().len()
+        );
         Ok(())
     }
 }
@@ -330,4 +339,3 @@ impl Drop for WatcherManager {
         let _ = self.stop();
     }
 }
-

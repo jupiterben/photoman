@@ -9,6 +9,7 @@ pub mod thumbnail;
 pub mod tags;
 pub mod recycle;
 pub mod watcher;
+pub mod photos;
 
 // Re-export commands for easy access
 pub use database::*;
@@ -19,4 +20,5 @@ pub use thumbnail::*;
 pub use tags::*;
 pub use recycle::*;
 pub use watcher::*;
+pub use photos::*;
 
