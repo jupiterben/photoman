@@ -188,13 +188,13 @@ export const useWatcherStore = create<WatcherState>((set, get) => ({
   clearError: () => set({ error: null }),
 
   // 开始监听文件系统事件
-  startListening: async () => {
+  startListening: () => {
     if (unlistenFileSystem) {
       return; // 已经在监听
     }
 
     try {
-      unlistenFileSystem = await listen<{ type: string; path: string }>(
+      unlistenFileSystem = listen<{ type: string; path: string }>(
         'file-system-event',
         (payload) => {
           console.log('文件系统事件:', payload);

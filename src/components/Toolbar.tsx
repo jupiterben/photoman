@@ -2,7 +2,7 @@
  * Top toolbar component
  */
 import { useState } from 'react';
-import { Layout, Button, Space, Dropdown, message } from 'antd';
+import { Layout, Button, Space, Dropdown, App } from 'antd';
 import {
   PlusOutlined,
   BulbOutlined,
@@ -34,6 +34,7 @@ function Toolbar({
   onImportComplete,
 }: ToolbarProps) {
   const { t, i18n } = useTranslation();
+  const { message } = App.useApp();
   const { addDirectory } = useWatcherStore();
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);

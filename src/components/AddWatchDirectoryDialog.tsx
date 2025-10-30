@@ -2,7 +2,7 @@
 // T195: 实现添加监控目录对话框
 
 import React, { useState } from 'react';
-import { Modal, Form, Input, Switch, Button, message } from 'antd';
+import { Modal, Form, Input, Switch, Button, App } from 'antd';
 import { FolderOpenOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { open } from '@/api/tauri-adapter';
@@ -19,6 +19,7 @@ export const AddWatchDirectoryDialog: React.FC<AddWatchDirectoryDialogProps> = (
   onAdd,
 }) => {
   const { t } = useTranslation();
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [directoryPath, setDirectoryPath] = useState('');

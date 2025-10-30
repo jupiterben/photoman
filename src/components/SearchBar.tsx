@@ -118,7 +118,10 @@ export function SearchBar({ onAdvancedFilterClick, showAdvancedFilter = true }: 
         }}
         onChange={setKeyword}
         className="search-bar-input"
-        popupClassName="search-bar-dropdown"
+        popupMatchSelectWidth={false}
+        classNames={{
+          popup: 'search-bar-dropdown'
+        }}
         notFoundContent={searching ? <Spin size="small" /> : null}
       >
         <Input

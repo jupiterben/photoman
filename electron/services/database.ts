@@ -1,6 +1,9 @@
 import Database from 'better-sqlite3';
 import { app } from 'electron';
 import * as path from 'path';
+import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { eq, and, desc, asc, like, or, sql } from 'drizzle-orm';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { BaseService } from './base-service';
 import {
   Photo,
@@ -17,18 +20,19 @@ import {
   ScanJob,
 } from '../types';
 import { createDatabaseError } from '../utils/error-handler';
+import * as schema from './db-schema';
 
 /**
  * 数据库服务
- * 使用better-sqlite3管理SQLite数据库
+ * 使用 Drizzle ORM + better-sqlite3
  */
 export class DatabaseService extends BaseService {
-  private db!: Database.Database;
+  private sqlite!: Database.Database;
+  private db!: BetterSQLite3Database<typeof schema>;
   private dbPath: string;
 
   constructor() {
     super('DatabaseService');
-    // 数据库路径
     const userDataPath = app.getPath('userData');
     this.dbPath = path.join(userDataPath, 'photoman.db');
   }
@@ -39,19 +43,22 @@ export class DatabaseService extends BaseService {
   protected initializeService(): void {
     try {
       // 打开数据库连接
-      this.db = new Database(this.dbPath);
+      this.sqlite = new Database(this.dbPath);
 
       // 启用WAL模式（Write-Ahead Logging）提升性能
-      this.db.pragma('journal_mode = WAL');
+      this.sqlite.pragma('journal_mode = WAL');
 
       // 启用外键约束
-      this.db.pragma('foreign_keys = ON');
+      this.sqlite.pragma('foreign_keys = ON');
 
       // 增加缓存大小
-      this.db.pragma('cache_size = 10000');
+      this.sqlite.pragma('cache_size = 10000');
 
-      // 验证数据库完整性
-      this.verifyDatabase();
+      // 初始化 Drizzle ORM
+      this.db = drizzle(this.sqlite, { schema });
+
+      // 初始化表结构
+      this.initializeTables();
     } catch (error) {
       throw createDatabaseError('Failed to initialize database', error as Error, {
         dbPath: this.dbPath,
@@ -63,30 +70,146 @@ export class DatabaseService extends BaseService {
    * 清理数据库资源
    */
   protected cleanupService(): void {
-    if (this.db) {
-      this.db.close();
+    if (this.sqlite) {
+      this.sqlite.close();
     }
   }
 
   /**
-   * 验证数据库表结构
+   * 初始化数据库表结构
+   * 优先使用 Drizzle 迁移，降级到直接推送 schema
    */
-  private verifyDatabase(): void {
-    // 检查核心表是否存在
-    const tables = this.db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table'")
-      .all() as Array<{ name: string }>;
+  private initializeTables(): void {
+    try {
+      // 生产环境：尝试从打包后的迁移文件加载
+      const migrationsFolder = path.join(__dirname, '../drizzle');
 
-    const requiredTables = ['photos', 'tags', 'albums'];
-    const existingTables = new Set(tables.map((t) => t.name));
-
-    for (const table of requiredTables) {
-      if (!existingTables.has(table)) {
-        throw createDatabaseError(`Required table "${table}" does not exist in database`, undefined, {
-          dbPath: this.dbPath,
-        });
+      try {
+        migrate(this.db, { migrationsFolder });
+        console.log(`[DatabaseService] ✓ Migrations applied from: ${migrationsFolder}`);
+      } catch (migrationError) {
+        console.log('[DatabaseService] No migrations folder found, falling back to push mode');
+        // 降级：直接推送 schema
+        this.pushSchema();
       }
+
+      console.log(`[DatabaseService] ✓ Database initialized at: ${this.dbPath}`);
+    } catch (error) {
+      console.error('[DatabaseService] ✗ Failed to initialize tables:', error);
+      throw error;
     }
+  }
+
+  /**
+   * 直接推送 schema 到数据库
+   * 等效于 drizzle-kit push，用于开发或迁移文件不存在时
+   */
+  private pushSchema(): void {
+    const statements = [
+      sql`CREATE TABLE IF NOT EXISTS photos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_path TEXT NOT NULL UNIQUE,
+        file_name TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        file_hash TEXT NOT NULL,
+        width INTEGER,
+        height INTEGER,
+        format TEXT NOT NULL,
+        title TEXT,
+        description TEXT,
+        rating INTEGER NOT NULL DEFAULT 0,
+        taken_at TEXT,
+        camera_make TEXT,
+        camera_model TEXT,
+        lens_model TEXT,
+        focal_length REAL,
+        aperture REAL,
+        shutter_speed TEXT,
+        iso INTEGER,
+        gps_latitude REAL,
+        gps_longitude REAL,
+        gps_altitude REAL,
+        is_favorite INTEGER NOT NULL DEFAULT 0,
+        is_deleted INTEGER NOT NULL DEFAULT 0,
+        deleted_at TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        first_scanned_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+
+      sql`CREATE TABLE IF NOT EXISTS tags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        color TEXT,
+        parent_id INTEGER,
+        usage_count INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+
+      sql`CREATE TABLE IF NOT EXISTS albums (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        cover_photo_id INTEGER REFERENCES photos(id) ON DELETE SET NULL,
+        sort_order TEXT NOT NULL DEFAULT 'date_desc',
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+
+      sql`CREATE TABLE IF NOT EXISTS photo_tags (
+        photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+        tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (photo_id, tag_id)
+      )`,
+
+      sql`CREATE TABLE IF NOT EXISTS album_photos (
+        album_id INTEGER NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
+        photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+        display_order INTEGER NOT NULL DEFAULT 0,
+        added_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (album_id, photo_id)
+      )`,
+
+      sql`CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+
+      sql`CREATE TABLE IF NOT EXISTS scan_jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        target_path TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'running',
+        total_files INTEGER NOT NULL DEFAULT 0,
+        processed_files INTEGER NOT NULL DEFAULT 0,
+        found_photos INTEGER NOT NULL DEFAULT 0,
+        duplicates_skipped INTEGER NOT NULL DEFAULT 0,
+        error_message TEXT,
+        started_at TEXT NOT NULL DEFAULT (datetime('now')),
+        finished_at TEXT
+      )`,
+
+      // 创建索引
+      sql`CREATE INDEX IF NOT EXISTS idx_photos_file_path ON photos(file_path)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_photos_deleted_at ON photos(deleted_at)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_photos_taken_at ON photos(taken_at)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_photos_rating ON photos(rating)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_photos_favorite ON photos(is_favorite)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_photo_tags_photo_id ON photo_tags(photo_id)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_photo_tags_tag_id ON photo_tags(tag_id)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_album_photos_album_id ON album_photos(album_id)`,
+      sql`CREATE INDEX IF NOT EXISTS idx_album_photos_photo_id ON album_photos(photo_id)`,
+    ];
+
+    // 执行所有 SQL 语句
+    for (const statement of statements) {
+      this.db.run(statement);
+    }
+
+    console.log('[DatabaseService] ✓ Schema pushed to database');
   }
 
   // ==================== Photos CRUD ====================
@@ -104,14 +227,21 @@ export class DatabaseService extends BaseService {
         includeDeleted = false,
       } = options;
 
-      let sql = 'SELECT * FROM photos';
-      if (!includeDeleted) {
-        sql += ' WHERE is_deleted = 0';
-      }
-      sql += ` ORDER BY ${orderBy} ${order} LIMIT ? OFFSET ?`;
+      const orderFn = order === 'DESC' ? desc : asc;
+      const orderCol = schema.photos[orderBy] || schema.photos.taken_at;
 
-      const stmt = this.db.prepare(sql);
-      return stmt.all(limit, offset) as Photo[];
+      let query = this.db
+        .select()
+        .from(schema.photos)
+        .orderBy(orderFn(orderCol))
+        .limit(limit)
+        .offset(offset);
+
+      if (!includeDeleted) {
+        query = query.where(eq(schema.photos.is_deleted, false)) as any;
+      }
+
+      return query.all() as Photo[];
     }) as unknown as Photo[];
   }
 
@@ -121,8 +251,9 @@ export class DatabaseService extends BaseService {
   getPhotoById(id: number): Photo | null {
     this.ensureInitialized();
 
-    const stmt = this.db.prepare('SELECT * FROM photos WHERE id = ?');
-    return stmt.get(id) as Photo | null;
+    const result = this.db.select().from(schema.photos).where(eq(schema.photos.id, id)).get();
+
+    return (result as Photo) || null;
   }
 
   /**
@@ -132,28 +263,27 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const stmt = this.db.prepare(`
-      INSERT INTO photos (
-        file_path, file_name, file_size, file_hash, format,
-        width, height, rating, is_favorite, is_deleted,
-        created_at, updated_at, first_scanned_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)
-    `);
+    const result = this.db
+      .insert(schema.photos)
+      .values({
+        file_path: input.file_path,
+        file_name: input.file_name,
+        file_size: input.file_size,
+        file_hash: input.file_hash,
+        format: input.format,
+        width: input.width || null,
+        height: input.height || null,
+        rating: 0,
+        is_favorite: false,
+        is_deleted: false,
+        created_at: now,
+        updated_at: now,
+        first_scanned_at: now,
+      })
+      .returning()
+      .get();
 
-    const result = stmt.run(
-      input.file_path,
-      input.file_name,
-      input.file_size,
-      input.file_hash,
-      input.format,
-      input.width || null,
-      input.height || null,
-      now,
-      now,
-      now
-    );
-
-    return this.getPhotoById(result.lastInsertRowid as number)!;
+    return result as Photo;
   }
 
   /**
@@ -163,32 +293,14 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const fields: string[] = [];
-    const values: any[] = [];
+    const updates: any = { updated_at: now };
 
-    if (input.title !== undefined) {
-      fields.push('title = ?');
-      values.push(input.title);
-    }
-    if (input.description !== undefined) {
-      fields.push('description = ?');
-      values.push(input.description);
-    }
-    if (input.rating !== undefined) {
-      fields.push('rating = ?');
-      values.push(input.rating);
-    }
-    if (input.is_favorite !== undefined) {
-      fields.push('is_favorite = ?');
-      values.push(input.is_favorite ? 1 : 0);
-    }
+    if (input.title !== undefined) updates.title = input.title;
+    if (input.description !== undefined) updates.description = input.description;
+    if (input.rating !== undefined) updates.rating = input.rating;
+    if (input.is_favorite !== undefined) updates.is_favorite = input.is_favorite;
 
-    fields.push('updated_at = ?');
-    values.push(now);
-    values.push(input.id);
-
-    const sql = `UPDATE photos SET ${fields.join(', ')} WHERE id = ?`;
-    this.db.prepare(sql).run(...values);
+    this.db.update(schema.photos).set(updates).where(eq(schema.photos.id, input.id)).run();
   }
 
   /**
@@ -200,14 +312,16 @@ export class DatabaseService extends BaseService {
     if (soft) {
       const now = new Date().toISOString();
       this.db
-        .prepare(`
-        UPDATE photos 
-        SET is_deleted = 1, deleted_at = ?, updated_at = ?
-        WHERE id = ?
-      `)
-        .run(now, now, id);
+        .update(schema.photos)
+        .set({
+          is_deleted: true,
+          deleted_at: now,
+          updated_at: now,
+        })
+        .where(eq(schema.photos.id, id))
+        .run();
     } else {
-      this.db.prepare('DELETE FROM photos WHERE id = ?').run(id);
+      this.db.delete(schema.photos).where(eq(schema.photos.id, id)).run();
     }
   }
 
@@ -219,12 +333,14 @@ export class DatabaseService extends BaseService {
 
     const now = new Date().toISOString();
     this.db
-      .prepare(`
-        UPDATE photos
-        SET is_deleted = 0, deleted_at = NULL, updated_at = ?
-        WHERE id = ?
-      `)
-      .run(now, id);
+      .update(schema.photos)
+      .set({
+        is_deleted: false,
+        deleted_at: null,
+        updated_at: now,
+      })
+      .where(eq(schema.photos.id, id))
+      .run();
   }
 
   /**
@@ -233,12 +349,13 @@ export class DatabaseService extends BaseService {
   getPhotoCount(includeDeleted: boolean = false): number {
     this.ensureInitialized();
 
-    let sql = 'SELECT COUNT(*) as count FROM photos';
+    let query = this.db.select({ count: sql<number>`count(*)` }).from(schema.photos);
+
     if (!includeDeleted) {
-      sql += ' WHERE is_deleted = 0';
+      query = query.where(eq(schema.photos.is_deleted, false)) as any;
     }
 
-    const result = this.db.prepare(sql).get() as { count: number };
+    const result = query.get() as { count: number };
     return result.count;
   }
 
@@ -250,7 +367,7 @@ export class DatabaseService extends BaseService {
   getAllTags(): Tag[] {
     this.ensureInitialized();
 
-    return this.db.prepare('SELECT * FROM tags ORDER BY name').all() as Tag[];
+    return this.db.select().from(schema.tags).orderBy(asc(schema.tags.name)).all() as Tag[];
   }
 
   /**
@@ -259,7 +376,9 @@ export class DatabaseService extends BaseService {
   getTagById(id: number): Tag | null {
     this.ensureInitialized();
 
-    return this.db.prepare('SELECT * FROM tags WHERE id = ?').get(id) as Tag | null;
+    const result = this.db.select().from(schema.tags).where(eq(schema.tags.id, id)).get();
+
+    return (result as Tag) || null;
   }
 
   /**
@@ -269,14 +388,20 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const stmt = this.db.prepare(`
-      INSERT INTO tags (name, color, parent_id, usage_count, created_at, updated_at)
-      VALUES (?, ?, ?, 0, ?, ?)
-    `);
+    const result = this.db
+      .insert(schema.tags)
+      .values({
+        name: input.name,
+        color: input.color || null,
+        parent_id: input.parent_id || null,
+        usage_count: 0,
+        created_at: now,
+        updated_at: now,
+      })
+      .returning()
+      .get();
 
-    const result = stmt.run(input.name, input.color || null, input.parent_id || null, now, now);
-
-    return this.getTagById(result.lastInsertRowid as number)!;
+    return result as Tag;
   }
 
   /**
@@ -286,28 +411,13 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const fields: string[] = [];
-    const values: any[] = [];
+    const updates: any = { updated_at: now };
 
-    if (input.name !== undefined) {
-      fields.push('name = ?');
-      values.push(input.name);
-    }
-    if (input.color !== undefined) {
-      fields.push('color = ?');
-      values.push(input.color);
-    }
-    if (input.parent_id !== undefined) {
-      fields.push('parent_id = ?');
-      values.push(input.parent_id);
-    }
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.color !== undefined) updates.color = input.color;
+    if (input.parent_id !== undefined) updates.parent_id = input.parent_id;
 
-    fields.push('updated_at = ?');
-    values.push(now);
-    values.push(input.id);
-
-    const sql = `UPDATE tags SET ${fields.join(', ')} WHERE id = ?`;
-    this.db.prepare(sql).run(...values);
+    this.db.update(schema.tags).set(updates).where(eq(schema.tags.id, input.id)).run();
   }
 
   /**
@@ -316,7 +426,7 @@ export class DatabaseService extends BaseService {
   deleteTag(id: number): void {
     this.ensureInitialized();
 
-    this.db.prepare('DELETE FROM tags WHERE id = ?').run(id);
+    this.db.delete(schema.tags).where(eq(schema.tags.id, id)).run();
   }
 
   // ==================== Photo-Tag Relations ====================
@@ -328,21 +438,29 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    this.db
-      .prepare(`
-      INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, created_at)
-      VALUES (?, ?, ?)
-    `)
-      .run(photoId, tagId, now);
+
+    // 插入关联（忽略重复）
+    try {
+      this.db
+        .insert(schema.photoTags)
+        .values({
+          photo_id: photoId,
+          tag_id: tagId,
+          created_at: now,
+        })
+        .run();
+    } catch (error) {
+      // 忽略唯一约束错误
+    }
 
     // 更新标签使用计数
     this.db
-      .prepare(`
-      UPDATE tags
-      SET usage_count = (SELECT COUNT(*) FROM photo_tags WHERE tag_id = ?)
-      WHERE id = ?
-    `)
-      .run(tagId, tagId);
+      .update(schema.tags)
+      .set({
+        usage_count: sql`(SELECT COUNT(*) FROM ${schema.photoTags} WHERE tag_id = ${tagId})`,
+      })
+      .where(eq(schema.tags.id, tagId))
+      .run();
   }
 
   /**
@@ -352,17 +470,18 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     this.db
-      .prepare('DELETE FROM photo_tags WHERE photo_id = ? AND tag_id = ?')
-      .run(photoId, tagId);
+      .delete(schema.photoTags)
+      .where(and(eq(schema.photoTags.photo_id, photoId), eq(schema.photoTags.tag_id, tagId)))
+      .run();
 
     // 更新标签使用计数
     this.db
-      .prepare(`
-      UPDATE tags
-      SET usage_count = (SELECT COUNT(*) FROM photo_tags WHERE tag_id = ?)
-      WHERE id = ?
-    `)
-      .run(tagId, tagId);
+      .update(schema.tags)
+      .set({
+        usage_count: sql`(SELECT COUNT(*) FROM ${schema.photoTags} WHERE tag_id = ${tagId})`,
+      })
+      .where(eq(schema.tags.id, tagId))
+      .run();
   }
 
   /**
@@ -371,14 +490,23 @@ export class DatabaseService extends BaseService {
   getPhotoTags(photoId: number): Tag[] {
     this.ensureInitialized();
 
-    return this.db
-      .prepare(`
-        SELECT t.* FROM tags t
-        INNER JOIN photo_tags pt ON t.id = pt.tag_id
-        WHERE pt.photo_id = ?
-        ORDER BY t.name
-      `)
-      .all(photoId) as Tag[];
+    const result = this.db
+      .select({
+        id: schema.tags.id,
+        name: schema.tags.name,
+        color: schema.tags.color,
+        parent_id: schema.tags.parent_id,
+        usage_count: schema.tags.usage_count,
+        created_at: schema.tags.created_at,
+        updated_at: schema.tags.updated_at,
+      })
+      .from(schema.tags)
+      .innerJoin(schema.photoTags, eq(schema.tags.id, schema.photoTags.tag_id))
+      .where(eq(schema.photoTags.photo_id, photoId))
+      .orderBy(asc(schema.tags.name))
+      .all();
+
+    return result as Tag[];
   }
 
   /**
@@ -387,14 +515,15 @@ export class DatabaseService extends BaseService {
   getPhotosWithTag(tagId: number): Photo[] {
     this.ensureInitialized();
 
-    return this.db
-      .prepare(`
-        SELECT p.* FROM photos p
-        INNER JOIN photo_tags pt ON p.id = pt.photo_id
-        WHERE pt.tag_id = ? AND p.is_deleted = 0
-        ORDER BY p.taken_at DESC
-      `)
-      .all(tagId) as Photo[];
+    const result = this.db
+      .select()
+      .from(schema.photos)
+      .innerJoin(schema.photoTags, eq(schema.photos.id, schema.photoTags.photo_id))
+      .where(and(eq(schema.photoTags.tag_id, tagId), eq(schema.photos.is_deleted, false)))
+      .orderBy(desc(schema.photos.taken_at))
+      .all();
+
+    return result.map((r: any) => r.photos) as Photo[];
   }
 
   // ==================== Albums CRUD ====================
@@ -405,7 +534,11 @@ export class DatabaseService extends BaseService {
   getAllAlbums(): Album[] {
     this.ensureInitialized();
 
-    return this.db.prepare('SELECT * FROM albums ORDER BY created_at DESC').all() as Album[];
+    return this.db
+      .select()
+      .from(schema.albums)
+      .orderBy(desc(schema.albums.created_at))
+      .all() as Album[];
   }
 
   /**
@@ -414,7 +547,9 @@ export class DatabaseService extends BaseService {
   getAlbumById(id: number): Album | null {
     this.ensureInitialized();
 
-    return this.db.prepare('SELECT * FROM albums WHERE id = ?').get(id) as Album | null;
+    const result = this.db.select().from(schema.albums).where(eq(schema.albums.id, id)).get();
+
+    return (result as Album) || null;
   }
 
   /**
@@ -424,20 +559,19 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const stmt = this.db.prepare(`
-      INSERT INTO albums (name, description, sort_order, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?)
-    `);
+    const result = this.db
+      .insert(schema.albums)
+      .values({
+        name: input.name,
+        description: input.description || null,
+        sort_order: input.sort_order || 'date_desc',
+        created_at: now,
+        updated_at: now,
+      })
+      .returning()
+      .get();
 
-    const result = stmt.run(
-      input.name,
-      input.description || null,
-      input.sort_order || 'date_desc',
-      now,
-      now
-    );
-
-    return this.getAlbumById(result.lastInsertRowid as number)!;
+    return result as Album;
   }
 
   /**
@@ -447,32 +581,14 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const fields: string[] = [];
-    const values: any[] = [];
+    const updates: any = { updated_at: now };
 
-    if (input.name !== undefined) {
-      fields.push('name = ?');
-      values.push(input.name);
-    }
-    if (input.description !== undefined) {
-      fields.push('description = ?');
-      values.push(input.description);
-    }
-    if (input.sort_order !== undefined) {
-      fields.push('sort_order = ?');
-      values.push(input.sort_order);
-    }
-    if (input.cover_photo_id !== undefined) {
-      fields.push('cover_photo_id = ?');
-      values.push(input.cover_photo_id);
-    }
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.description !== undefined) updates.description = input.description;
+    if (input.sort_order !== undefined) updates.sort_order = input.sort_order;
+    if (input.cover_photo_id !== undefined) updates.cover_photo_id = input.cover_photo_id;
 
-    fields.push('updated_at = ?');
-    values.push(now);
-    values.push(input.id);
-
-    const sql = `UPDATE albums SET ${fields.join(', ')} WHERE id = ?`;
-    this.db.prepare(sql).run(...values);
+    this.db.update(schema.albums).set(updates).where(eq(schema.albums.id, input.id)).run();
   }
 
   /**
@@ -481,7 +597,7 @@ export class DatabaseService extends BaseService {
   deleteAlbum(id: number): void {
     this.ensureInitialized();
 
-    this.db.prepare('DELETE FROM albums WHERE id = ?').run(id);
+    this.db.delete(schema.albums).where(eq(schema.albums.id, id)).run();
   }
 
   // ==================== Album-Photo Relations ====================
@@ -493,12 +609,19 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    this.db
-      .prepare(`
-      INSERT OR IGNORE INTO album_photos (album_id, photo_id, display_order, added_at)
-      VALUES (?, ?, ?, ?)
-    `)
-      .run(albumId, photoId, displayOrder, now);
+    try {
+      this.db
+        .insert(schema.albumPhotos)
+        .values({
+          album_id: albumId,
+          photo_id: photoId,
+          display_order: displayOrder,
+          added_at: now,
+        })
+        .run();
+    } catch (error) {
+      // 忽略唯一约束错误
+    }
   }
 
   /**
@@ -508,8 +631,11 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     this.db
-      .prepare('DELETE FROM album_photos WHERE album_id = ? AND photo_id = ?')
-      .run(albumId, photoId);
+      .delete(schema.albumPhotos)
+      .where(
+        and(eq(schema.albumPhotos.album_id, albumId), eq(schema.albumPhotos.photo_id, photoId))
+      )
+      .run();
   }
 
   /**
@@ -518,14 +644,15 @@ export class DatabaseService extends BaseService {
   getAlbumPhotos(albumId: number): Photo[] {
     this.ensureInitialized();
 
-    return this.db
-      .prepare(`
-        SELECT p.* FROM photos p
-        INNER JOIN album_photos ap ON p.id = ap.photo_id
-        WHERE ap.album_id = ? AND p.is_deleted = 0
-        ORDER BY ap.display_order, p.taken_at DESC
-      `)
-      .all(albumId) as Photo[];
+    const result = this.db
+      .select()
+      .from(schema.photos)
+      .innerJoin(schema.albumPhotos, eq(schema.photos.id, schema.albumPhotos.photo_id))
+      .where(and(eq(schema.albumPhotos.album_id, albumId), eq(schema.photos.is_deleted, false)))
+      .orderBy(asc(schema.albumPhotos.display_order), desc(schema.photos.taken_at))
+      .all();
+
+    return result.map((r: any) => r.photos) as Photo[];
   }
 
   // ==================== Settings ====================
@@ -536,11 +663,9 @@ export class DatabaseService extends BaseService {
   getSetting(key: string): string | null {
     this.ensureInitialized();
 
-    const result = this.db
-      .prepare('SELECT value FROM settings WHERE key = ?')
-      .get(key) as { value: string } | undefined;
+    const result = this.db.select().from(schema.settings).where(eq(schema.settings.key, key)).get();
 
-    return result?.value || null;
+    return result ? (result as any).value : null;
   }
 
   /**
@@ -550,12 +675,16 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    this.db
-      .prepare(`
+
+    // 使用原生 SQL 实现 UPSERT
+    this.sqlite
+      .prepare(
+        `
       INSERT INTO settings (key, value, updated_at)
       VALUES (?, ?, ?)
       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?
-    `)
+    `
+      )
       .run(key, value, now, value, now);
   }
 
@@ -574,19 +703,15 @@ export class DatabaseService extends BaseService {
       backup_day: 'sunday',
     };
 
-    // 从数据库读取设置并合并
-    const settings = this.db.prepare('SELECT key, value FROM settings').all() as Array<{
-      key: string;
-      value: string;
-    }>;
+    const allSettings = this.db.select().from(schema.settings).all();
 
     const result: any = { ...defaults };
-    for (const { key, value } of settings) {
-      if (key in defaults) {
+    for (const setting of allSettings as any[]) {
+      if (setting.key in defaults) {
         try {
-          result[key] = JSON.parse(value);
+          result[setting.key] = JSON.parse(setting.value);
         } catch {
-          result[key] = value;
+          result[setting.key] = setting.value;
         }
       }
     }
@@ -602,20 +727,24 @@ export class DatabaseService extends BaseService {
   searchPhotos(query: string): Photo[] {
     this.ensureInitialized();
 
-    // TODO: 实现FTS5全文搜索
-    // 暂时使用简单的LIKE搜索
+    const searchPattern = `%${query}%`;
+
     return this.db
-      .prepare(`
-        SELECT * FROM photos
-        WHERE is_deleted = 0 AND (
-          file_name LIKE ? OR
-          title LIKE ? OR
-          description LIKE ?
+      .select()
+      .from(schema.photos)
+      .where(
+        and(
+          eq(schema.photos.is_deleted, false),
+          or(
+            like(schema.photos.file_name, searchPattern),
+            like(schema.photos.title, searchPattern),
+            like(schema.photos.description, searchPattern)
+          )
         )
-        ORDER BY taken_at DESC
-        LIMIT 100
-      `)
-      .all(`%${query}%`, `%${query}%`, `%${query}%`) as Photo[];
+      )
+      .orderBy(desc(schema.photos.taken_at))
+      .limit(100)
+      .all() as Photo[];
   }
 
   /**
@@ -624,24 +753,25 @@ export class DatabaseService extends BaseService {
   searchPhotosByFilter(criteria: FilterCriteria): Photo[] {
     this.ensureInitialized();
 
-    // TODO: 实现复杂的筛选查询
-    // 这是一个简化版本
-    let sql = 'SELECT * FROM photos WHERE is_deleted = 0';
-    const params: any[] = [];
+    const conditions = [eq(schema.photos.is_deleted, false)];
 
     if (criteria.is_favorite !== undefined) {
-      sql += ' AND is_favorite = ?';
-      params.push(criteria.is_favorite ? 1 : 0);
+      conditions.push(eq(schema.photos.is_favorite, criteria.is_favorite));
     }
 
     if (criteria.rating) {
-      sql += ' AND rating BETWEEN ? AND ?';
-      params.push(criteria.rating.min, criteria.rating.max);
+      conditions.push(
+        sql`${schema.photos.rating} BETWEEN ${criteria.rating.min} AND ${criteria.rating.max}`
+      );
     }
 
-    sql += ' ORDER BY taken_at DESC LIMIT 1000';
-
-    return this.db.prepare(sql).all(...params) as Photo[];
+    return this.db
+      .select()
+      .from(schema.photos)
+      .where(and(...conditions))
+      .orderBy(desc(schema.photos.taken_at))
+      .limit(1000)
+      .all() as Photo[];
   }
 
   // ==================== Scan Jobs ====================
@@ -653,17 +783,21 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     const now = new Date().toISOString();
-    const stmt = this.db.prepare(`
-      INSERT INTO scan_jobs (
-        target_path, status, total_files, processed_files,
-        found_photos, duplicates_skipped, started_at
-      ) VALUES (?, 'running', 0, 0, 0, 0, ?)
-    `);
+    const result = this.db
+      .insert(schema.scanJobs)
+      .values({
+        target_path: targetPath,
+        status: 'running',
+        total_files: 0,
+        processed_files: 0,
+        found_photos: 0,
+        duplicates_skipped: 0,
+        started_at: now,
+      })
+      .returning()
+      .get();
 
-    const result = stmt.run(targetPath, now);
-    const id = result.lastInsertRowid as number;
-
-    return this.db.prepare('SELECT * FROM scan_jobs WHERE id = ?').get(id) as ScanJob;
+    return result as ScanJob;
   }
 
   /**
@@ -672,42 +806,23 @@ export class DatabaseService extends BaseService {
   updateScanJob(id: number, updates: Partial<ScanJob>): void {
     this.ensureInitialized();
 
-    const fields: string[] = [];
-    const values: any[] = [];
+    const values: any = {};
 
     if (updates.status !== undefined) {
-      fields.push('status = ?');
-      values.push(updates.status);
+      values.status = updates.status;
       if (updates.status !== 'running') {
-        fields.push('finished_at = ?');
-        values.push(new Date().toISOString());
+        values.finished_at = new Date().toISOString();
       }
     }
-    if (updates.total_files !== undefined) {
-      fields.push('total_files = ?');
-      values.push(updates.total_files);
-    }
-    if (updates.processed_files !== undefined) {
-      fields.push('processed_files = ?');
-      values.push(updates.processed_files);
-    }
-    if (updates.found_photos !== undefined) {
-      fields.push('found_photos = ?');
-      values.push(updates.found_photos);
-    }
-    if (updates.duplicates_skipped !== undefined) {
-      fields.push('duplicates_skipped = ?');
-      values.push(updates.duplicates_skipped);
-    }
-    if (updates.error_message !== undefined) {
-      fields.push('error_message = ?');
-      values.push(updates.error_message);
-    }
+    if (updates.total_files !== undefined) values.total_files = updates.total_files;
+    if (updates.processed_files !== undefined) values.processed_files = updates.processed_files;
+    if (updates.found_photos !== undefined) values.found_photos = updates.found_photos;
+    if (updates.duplicates_skipped !== undefined)
+      values.duplicates_skipped = updates.duplicates_skipped;
+    if (updates.error_message !== undefined) values.error_message = updates.error_message;
 
-    if (fields.length > 0) {
-      values.push(id);
-      const sql = `UPDATE scan_jobs SET ${fields.join(', ')} WHERE id = ?`;
-      this.db.prepare(sql).run(...values);
+    if (Object.keys(values).length > 0) {
+      this.db.update(schema.scanJobs).set(values).where(eq(schema.scanJobs.id, id)).run();
     }
   }
 
@@ -718,8 +833,11 @@ export class DatabaseService extends BaseService {
     this.ensureInitialized();
 
     return this.db
-      .prepare('SELECT * FROM scan_jobs ORDER BY started_at DESC LIMIT ?')
-      .all(limit) as ScanJob[];
+      .select()
+      .from(schema.scanJobs)
+      .orderBy(desc(schema.scanJobs.started_at))
+      .limit(limit)
+      .all() as ScanJob[];
   }
 
   // ==================== Transaction Support ====================
@@ -730,12 +848,9 @@ export class DatabaseService extends BaseService {
   transaction<T>(fn: () => T): T {
     this.ensureInitialized();
 
-    const transaction = this.db.transaction(fn);
-    return transaction();
+    return this.sqlite.transaction(fn)();
   }
 }
 
 // ==================== Singleton Export ====================
 export const databaseService = new DatabaseService();
-
-

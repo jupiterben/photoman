@@ -14,15 +14,11 @@ export const WatchedDirectories: React.FC = () => {
 
   return (
     <div className="watched-directories-page">
-      <Title level={2}>{t('watcher.pageTitle', '监控目录管理')}</Title>
+      <Title level={2}>{t('watcher.pageTitle', '')}</Title>
       <p className="page-description">
-        {t(
-          'watcher.pageDescription',
-          '添加目录以自动监控和同步图片，系统会实时检测文件变化。'
-        )}
+        {t('watcher.pageDescription', '添加目录以自动监控和同步图片，系统会实时检测文件变化。')}
       </p>
       <WatchedDirectoryList />
     </div>
   );
 };
-
