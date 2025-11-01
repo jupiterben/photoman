@@ -66,10 +66,12 @@ export function registerHandlers() {
   const { registerDatabaseHandlers } = require('./database-handlers');
   const { registerScannerHandlers } = require('./scanner-handlers');
   const { registerDialogHandlers } = require('./dialog-handlers');
+  const { registerWatcherHandlers } = require('./watcher-handlers');
   
   registerDatabaseHandlers(registerHandler);
   registerScannerHandlers(registerHandler);
   registerDialogHandlers(registerHandler);
+  registerWatcherHandlers(registerHandler);
 
   console.log('[IPC] Handlers registered successfully.');
 }

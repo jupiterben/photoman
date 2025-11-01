@@ -123,9 +123,7 @@ export function registerDatabaseHandlers(registerHandler: RegisterHandlerFn) {
     return databaseService.searchPhotos(args.query);
   });
 
-  registerHandler('search_photos_by_filter', async (args) => {
-    return databaseService.searchPhotosByFilter(args);
-  });
+  // 注意: search_photos_by_filter 在 scanner-handlers.ts 中注册（使用 searchService）
 
   // ===== Settings =====
   registerHandler('get_setting', async (args) => {

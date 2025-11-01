@@ -210,6 +210,9 @@
 - [x] T080.3 [额外] 实现Electron文件对话框IPC命令（electron/ipc/dialog-handlers.ts）
 - [x] T080.4 [额外] 修复模块系统冲突（创建dist-electron/package.json标记为commonjs，添加post-build脚本）
 - [x] T080.5 [额外] 清理Tauri代码和依赖（删除src-tauri、更新package.json、更新README.md）
+- [x] T080.6 [额外] 简化tauri-adapter.ts移除Tauri向后兼容代码（纯Electron实现）
+- [x] T080.7 [额外] 修复重复IPC处理器注册（search_photos_by_filter 在两处注册导致错误）
+- [x] T080.8 [额外] 实现数据库自动初始化（创建表结构、索引、FTS5、触发器）
 - [ ] T081 [P] 验证图片扫描功能（点击扫描文件夹按钮测试）
 - [ ] T082 [P] 验证图片浏览功能（缩略图网格、列表视图、详情页）
 - [ ] T083 [P] 验证标签功能（创建、编辑、删除、添加到图片）

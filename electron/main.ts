@@ -17,8 +17,25 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
+      devTools: isDev, // 生产环境禁用 DevTools
     },
     show: false, // 等待ready-to-show事件
+  });
+
+  // 设置 Content Security Policy
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          isDev
+            ? // 开发环境：允许 Vite 的 HMR 和开发服务器
+              "default-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* ws://localhost:* data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:*; style-src 'self' 'unsafe-inline' http://localhost:*; img-src 'self' data: blob: http://localhost:* file:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:*;"
+            : // 生产环境：严格的 CSP
+              "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: file:; font-src 'self' data:; connect-src 'self';"
+        ]
+      }
+    });
   });
 
   // 加载应用

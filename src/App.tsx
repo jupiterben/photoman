@@ -1,24 +1,22 @@
 import { useEffect } from 'react';
-import { ConfigProvider, theme, message as antdMessage, App as AntdApp } from 'antd';
+import { ConfigProvider, theme, App as AntdApp } from 'antd';
 import { RouterProvider } from 'react-router-dom';
 import router from '@/router';
 import { AppProvider, useApp } from '@/contexts/AppContext';
-import { getDatabaseInfo, PhotoManError } from '@/api/tauri';
+import { invoke } from '@/api/tauri-adapter';
 import './App.css';
 
 function AppContent() {
   const { isDarkMode } = useApp();
 
   useEffect(() => {
-    // Initialize database info check
+    // Initialize database check
     const loadInfo = async () => {
       try {
-        const info = await getDatabaseInfo();
-        console.log('Database initialized:', info);
+        const info = await invoke('ping');
+        console.log('Backend connected:', info);
       } catch (error) {
-        if (error instanceof PhotoManError) {
-          antdMessage.error(`数据库错误: ${error.message}`);
-        }
+        console.error('Backend connection failed:', error);
       }
     };
 
