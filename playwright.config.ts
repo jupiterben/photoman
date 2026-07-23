@@ -1,34 +1,25 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
 /**
- * Playwright configuration for PhotoMan E2E tests
- * See https://playwright.dev/docs/test-configuration
+ * Playwright configuration for PhotoMan E2E tests (Electron mode).
+ * Each test launches its own Electron app via the `_electron` fixture,
+ * so we do NOT start a separate web server here.
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  testIgnore: ['**/fixtures/**'],
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  retries: process.env.CI ? 1 : 0,
+  workers: 1,
+  timeout: 60_000,
+  expect: { timeout: 5_000 },
+  reporter: process.env.CI
+    ? [['list'], ['github'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'on-failure' }]],
   use: {
-    baseURL: 'http://127.0.0.1:11420',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-  },
-
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
-
-  // Run dev server before starting tests
-  webServer: {
-    command: 'npm run tauri:dev',
-    url: 'http://127.0.0.1:11420',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000, // 2 minutes for Tauri app to start
+    video: 'retain-on-failure',
   },
 });

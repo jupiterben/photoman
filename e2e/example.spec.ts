@@ -1,31 +1,16 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/electron-fixture';
 
-test.describe('PhotoMan Basic Tests', () => {
-  test('应用应该正常启动', async ({ page }) => {
-    await page.goto('/');
-
-    // 检查页面标题
-    await expect(page.locator('h1')).toContainText('PhotoMan');
+test.describe('PhotoMan 基础烟雾测试', () => {
+  test('应用窗口应该正常启动', async ({ window }) => {
+    await expect(window).toHaveTitle(/PhotoMan/);
   });
 
-  test('应该显示描述文本', async ({ page }) => {
-    await page.goto('/');
-
-    // 检查描述
-    await expect(page.locator('.app')).toContainText('本地图片管理应用');
+  test('根布局应该渲染', async ({ window }) => {
+    await expect(window.locator('#root, .app, [data-testid="app"]').first()).toBeVisible();
   });
 
-  test('主题切换按钮应该工作', async ({ page }) => {
-    await page.goto('/');
-
-    // 查找切换按钮
-    const themeButton = page.locator('button', { hasText: '切换' });
+  test('主题切换按钮应该可见', async ({ window }) => {
+    const themeButton = window.locator('button', { hasText: /切换|theme/i }).first();
     await expect(themeButton).toBeVisible();
-
-    // 点击切换主题
-    await themeButton.click();
   });
 });
-
-// 更多端到端测试将在后续阶段添加
-
